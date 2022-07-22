@@ -324,7 +324,7 @@ class Connection(ConnectionInterface):
             message_dict = None
 
         # Handle invalid message type
-        if message_dict is None or not is_valid_messagedict(message_dict):
+        if not is_valid_messagedict(message_dict):
             self._logger.info(f"Received invalid message.")
             self._logger.debug(f"Invalid message: {message}")
             err = ErrorDict(

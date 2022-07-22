@@ -1,12 +1,12 @@
 """Provide utility functions for type checking."""
 
 import logging
-from typing import Any, Type, TypedDict
+from typing import Any, Type, TypeGuard, TypedDict
 
 logger = logging.getLogger("TypesUtil")
 
 
-def check_valid_typeddict_keys(data: Any, type: Type[TypedDict]) -> bool:
+def check_valid_typeddict_keys(data: Any, type: Type[TypedDict]) -> TypeGuard[dict]:
     """Check if `data` is a valid dict according to `type`.
 
     Checks if all required and only required or optional keys from `type` exist in
@@ -42,7 +42,7 @@ def check_valid_typeddict_keys(data: Any, type: Type[TypedDict]) -> bool:
     )
 
 
-def check_dict(data: dict, required_keys: list[str], optional_keys: list[str]):
+def check_dict(data: dict, required_keys: list[str], optional_keys: list[str]) -> bool:
     """Check if `data` has all required and only required or optional keys.
 
     Parameters

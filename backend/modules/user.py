@@ -286,7 +286,7 @@ class User(AsyncIOEventEmitter, metaclass=ABCMeta):
         else:
             self._handlers[endpoint] = [handler]
 
-    async def handle_message(self, message: MessageDict | Any) -> None:
+    async def handle_message(self, message: MessageDict) -> None:
         """Handle incoming message from client.
 
         Pass Message data to all functions registered to message type endpoint using

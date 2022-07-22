@@ -3,7 +3,7 @@
 Use for type hints and static type checking without any overhead during runtime.
 """
 
-from typing import Any, TypedDict
+from typing import Any, TypeGuard, TypedDict
 
 import custom_types.util as util
 
@@ -69,7 +69,7 @@ class SessionDict(TypedDict):
     log: Any
 
 
-def is_valid_session(data, recursive: bool) -> bool:
+def is_valid_session(data, recursive: bool = True) -> TypeGuard[SessionDict]:
     """Check if `data` is a valid SessionDict.
 
     Checks if all required and no unknown keys exist in data as well as the data types
@@ -79,7 +79,7 @@ def is_valid_session(data, recursive: bool) -> bool:
     ----------
     data : any
         Data to perform check on.
-    recursive : bool
+    recursive : bool, default True
         If true, participants and notes will be checked recursively.
 
     Returns

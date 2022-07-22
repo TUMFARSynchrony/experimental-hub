@@ -3,7 +3,7 @@
 Use for type hints and static type checking without any overhead during runtime.
 """
 
-from typing import TypedDict
+from typing import Any, TypeGuard, TypedDict
 
 import custom_types.util as util
 
@@ -37,7 +37,7 @@ class ChatMessageDict(TypedDict):
     target: str
 
 
-def is_valid_chatmessage(data) -> bool:
+def is_valid_chatmessage(data: Any) -> TypeGuard[ChatMessageDict]:
     """Check if `data` is a valid ChatMessageDict.
 
     Checks if all required and no unknown keys exist in data as well as the data types

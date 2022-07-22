@@ -8,7 +8,7 @@ based on FilterDict.
 """
 
 import logging
-from typing import Literal, TypedDict, get_args
+from typing import Literal, TypeGuard, TypedDict, get_args
 
 import custom_types.util as util
 
@@ -44,7 +44,7 @@ class FilterDict(TypedDict):
     id: str
 
 
-def is_valid_filter_dict(data) -> bool:
+def is_valid_filter_dict(data) -> TypeGuard[FilterDict]:
     """Check if `data` is a valid FilterDict.
 
     Checks if all required and no unknown keys exist in data as well as the data types
@@ -88,7 +88,9 @@ class SetFiltersRequestDict(TypedDict):
     video_filters: list[FilterDict]
 
 
-def is_valid_set_filters_request(data, recursive: bool = True) -> bool:
+def is_valid_set_filters_request(
+    data, recursive: bool = True
+) -> TypeGuard[SetFiltersRequestDict]:
     """Check if `data` is a valid custom_types.filters.SetFiltersRequest.
 
     Checks if all required and no unknown keys exist in data as well as the data types

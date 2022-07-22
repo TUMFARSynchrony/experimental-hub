@@ -3,7 +3,7 @@
 Use for type hints and static type checking without any overhead during runtime.
 """
 
-from typing import TypedDict
+from typing import TypeGuard, TypedDict
 
 import custom_types.util as util
 
@@ -28,7 +28,7 @@ class SizeDict(TypedDict):
     height: int | float
 
 
-def is_valid_size(data) -> bool:
+def is_valid_size(data) -> TypeGuard[SizeDict]:
     """Check if `data` is a valid SizeDict.
 
     Checks if all required and no unknown keys exist in data as well as the data types

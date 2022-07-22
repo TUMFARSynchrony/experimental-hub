@@ -3,7 +3,7 @@
 Use for type hints and static type checking without any overhead during runtime.
 """
 
-from typing import TypedDict
+from typing import TypeGuard, TypedDict
 
 import custom_types.util as util
 
@@ -21,7 +21,7 @@ class SessionIdRequestDict(TypedDict):
     session_id: str
 
 
-def is_valid_session_id_request(data) -> bool:
+def is_valid_session_id_request(data) -> TypeGuard[SessionIdRequestDict]:
     """Check if `data` is a valid custom_types.session_id_request.SessionIdRequestDict.
 
     Checks if all required and no unknown keys exist in data as well as the data types

@@ -4,7 +4,7 @@ Use for type hints and static type checking without any overhead during runtime.
 """
 
 from __future__ import annotations
-from typing import Any, Literal, TypedDict, get_args
+from typing import Any, Literal, TypeGuard, TypedDict, get_args
 
 from custom_types.participant_summary import ParticipantSummaryDict
 
@@ -57,7 +57,7 @@ class ConnectionOfferDict(TypedDict):
     offer: RTCSessionDescriptionDict
 
 
-def is_valid_connection_offer_dict(data: Any) -> bool:
+def is_valid_connection_offer_dict(data: Any) -> TypeGuard[ConnectionOfferDict]:
     """Check if `data` is a valid custom_types.connection.ConnectionOfferDict.
 
     Parameters
@@ -104,7 +104,9 @@ class RTCSessionDescriptionDict(TypedDict):
 RTC_SESSION_TYPES = Literal["offer", "pranswer", "answer", "rollback"]
 
 
-def is_valid_rtc_session_description_dict(data: Any) -> bool:
+def is_valid_rtc_session_description_dict(
+    data: Any,
+) -> TypeGuard[RTCSessionDescriptionDict]:
     """Check if `data` is a valid custom_types.connection.RTCSessionDescriptionDict.
 
     Parameters
@@ -147,7 +149,7 @@ class ConnectionAnswerDict(TypedDict):
     answer: RTCSessionDescriptionDict
 
 
-def is_valid_connection_answer_dict(data: Any) -> bool:
+def is_valid_connection_answer_dict(data: Any) -> TypeGuard[ConnectionAnswerDict]:
     """Check if `data` is a valid custom_types.connection.ConnectionAnswerDict.
 
     Parameters

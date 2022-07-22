@@ -39,7 +39,7 @@ def parse_args() -> Tuple[
 
     # Check and parse offer
     try:
-        offer_obj: RTCSessionDescriptionDict = json.loads(args.offer)
+        offer_obj = json.loads(args.offer)
         audio_filters = json.loads(args.audio_filters)
         video_filters = json.loads(args.video_filters)
     except (json.JSONDecodeError, TypeError) as e:

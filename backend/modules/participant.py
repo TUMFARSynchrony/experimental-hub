@@ -169,7 +169,7 @@ class Participant(User):
 
             await asyncio.gather(*coros)
 
-    async def _handle_chat(self, data: ChatMessageDict | Any) -> MessageDict:
+    async def _handle_chat(self, data: Any) -> MessageDict:
         """Handle requests with type `CHAT`.
 
         Check if data is a valid custom_types.chat_message.ChatMessageDict, target is
@@ -179,7 +179,8 @@ class Participant(User):
         Parameters
         ----------
         data : any or custom_types.chat_message.ChatMessageDict
-            Message data.
+            Message data, can be anything.  Everything other than
+            custom_types.chat_message.ChatMessageDict will result in a `ERROR` response.
 
         Returns
         -------

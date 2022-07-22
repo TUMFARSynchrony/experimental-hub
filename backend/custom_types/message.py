@@ -6,7 +6,7 @@ Use for type hints and static type checking without any overhead during runtime.
 from __future__ import annotations
 import logging
 
-from typing import Any, Literal, TypedDict, get_args
+from typing import Any, Literal, TypeGuard, TypedDict, get_args
 
 import custom_types.util as util
 
@@ -78,7 +78,7 @@ Data Types Wiki :
 """
 
 
-def is_valid_messagedict(data) -> bool:
+def is_valid_messagedict(data: Any) -> TypeGuard[MessageDict]:
     """Check if `data` is a valid MessageDict.
 
     Checks if all required and no unknown keys exist in data as well as the data types

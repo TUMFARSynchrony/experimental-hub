@@ -3,7 +3,7 @@
 Use for type hints and static type checking without any overhead during runtime.
 """
 
-from typing import TypedDict
+from typing import TypeGuard, TypedDict
 
 import custom_types.util as util
 
@@ -31,7 +31,7 @@ class NoteDict(TypedDict):
     content: str
 
 
-def is_valid_note(data) -> bool:
+def is_valid_note(data) -> TypeGuard[NoteDict]:
     """Check if `data` is a valid NoteDict.
 
     Checks if all required and no unknown keys exist in data as well as the data types

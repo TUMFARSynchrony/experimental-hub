@@ -3,7 +3,7 @@
 Use for type hints and static type checking without any overhead during runtime.
 """
 
-from typing import TypedDict
+from typing import TypeGuard, TypedDict
 
 import custom_types.util as util
 
@@ -67,7 +67,7 @@ class ParticipantDict(TypedDict):
     banned: bool
 
 
-def is_valid_participant(data, recursive: bool = True) -> bool:
+def is_valid_participant(data, recursive: bool = True) -> TypeGuard[ParticipantDict]:
     """Check if `data` is a valid ParticipantDict.
 
     Checks if all required and no unknown keys exist in data as well as the data types
