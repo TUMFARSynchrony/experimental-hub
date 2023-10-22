@@ -130,6 +130,21 @@ function SessionPreview({
                       onClick={() => handleSingleParticipantClick(participantIndex)}
                     >
                       <ListItemText primary={`${participant.participant_name}`} />
+
+                      <ActionIconButton
+                        text="INVITE"
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        onClick={() =>
+                          handleCopyParticipantInviteLink(
+                            participant.id,
+                            participant.participant_name,
+                            selectedSession.id
+                          )
+                        }
+                        icon={<ContentCopyIcon />}
+                      />
                       {expandedParticipant === participantIndex ? <ExpandLess /> : <ExpandMore />}
                     </ListItemButton>
 
@@ -202,20 +217,6 @@ function SessionPreview({
                             justifyContent: "flex-end"
                           }}
                         >
-                          <ActionIconButton
-                            text="INVITE"
-                            variant="outlined"
-                            color="primary"
-                            size="small"
-                            onClick={() =>
-                              handleCopyParticipantInviteLink(
-                                participant.id,
-                                participant.participant_name,
-                                selectedSession.id
-                              )
-                            }
-                            icon={<ContentCopyIcon />}
-                          />
                           {/* Displays success/error notification on copy invite link to clipboard */}
                           <CustomSnackbar
                             open={snackbar.open}
