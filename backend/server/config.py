@@ -27,6 +27,7 @@ class Config:
     ping_subprocesses: float
     experimenter_multiprocessing: bool
     participant_multiprocessing: bool
+    post_processing: dict
 
     def __init__(self):
         """Load config from `backend/config.json`.
@@ -54,6 +55,7 @@ class Config:
             "ping_subprocesses": float,
             "experimenter_multiprocessing": bool,
             "participant_multiprocessing": bool,
+            "post_processing": dict
         }
         for key in data_types:
             if key not in config:
@@ -88,6 +90,7 @@ class Config:
         self.ping_subprocesses = config["ping_subprocesses"]
         self.experimenter_multiprocessing = config["experimenter_multiprocessing"]
         self.participant_multiprocessing = config["participant_multiprocessing"]
+        self.post_processing = config["post_processing"]
 
         # Parse log_file
         self.log_file = config.get("log_file")
@@ -121,9 +124,11 @@ class Config:
             f"={self.log_dependencies}, log_file={self.log_file}, ping_subprocesses="
             f"{self.ping_subprocesses}, experimenter_multiprocessing="
             f"{self.experimenter_multiprocessing}, participant_multiprocessing="
-            f"{self.participant_multiprocessing}."
+            f"{self.participant_multiprocessing}, post_processing="
+            f"{self.post_processing}."
         )
 
     def __repr__(self) -> str:
         """Get representation of this Config obj."""
         return f"Config({str(self)})"
+

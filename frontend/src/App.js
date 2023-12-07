@@ -45,6 +45,10 @@ function App() {
   const [connection, setConnection] = useState(null);
   const [connectionState, setConnectionState] = useState(null);
   const [connectedParticipants, setConnectedParticipants] = useState([]);
+  const [recordings, setRecordings] = useState([]);
+  const [status, setPostProcessingStatus] = useState(null);
+  const [errorPostProc, setPostProcessingError] = useState(null);
+  const [successPostProc, setPostProcessingSuccess] = useState(null);
   let [searchParams, setSearchParams] = useSearchParams();
   const sessionsList = useAppSelector(selectSessions);
   const ongoingExperiment = useAppSelector(selectOngoingExperiment);
@@ -93,6 +97,8 @@ function App() {
     connection.api.on("EXPERIMENT_STARTED", handleExperimentStarted);
     connection.api.on("EXPERIMENT_ENDED", handleExperimentEnded);
     connection.api.on("CHAT", handleChatMessages);
+    connection.api.on("RECORDING_LIST", handleRecordingList);
+    connection.api.on("CHECK_POST_PROCESSING", handleCheckPostProcessing);
     connection.api.on("FILTERS_DATA", handleFiltersData);
     return () => {
       connection.off("remoteStreamChange", streamChangeHandler);
@@ -110,6 +116,8 @@ function App() {
       connection.api.off("EXPERIMENT_STARTED", handleExperimentStarted);
       connection.api.off("EXPERIMENT_ENDED", handleExperimentEnded);
       connection.api.off("CHAT", handleChatMessages);
+      connection.api.off("RECORDING_LIST", handleRecordingList);
+      connection.api.off("CHECK_POST_PROCESSING", handleCheckPostProcessing);
       connection.api.off("FILTERS_DATA", handleFiltersData);
     };
   }, [connection]);
@@ -246,15 +254,25 @@ function App() {
   };
 
   const handleSuccess = (data) => {
-    setSnackbar({
-      open: true,
-      text: `SUCCESS: ${data.description}`,
-      severity: "success"
-    });
+    if (data.type == "POST_PROCESSING_VIDEO") {
+      setPostProcessingSuccess(data.description);
+      setPostProcessingError(null);
+    } else {
+      setSnackbar({
+        open: true,
+        text: `SUCCESS: ${data.description}`,
+        severity: "success"
+      });
+    }
   };
 
   const handleError = (data) => {
-    setSnackbar({ open: true, text: `${data.description}`, severity: "error" });
+    if (data.type == "POST_PROCESSING_FAILED") {
+      setPostProcessingError(data.description);
+      setPostProcessingSuccess(null);
+    } else {
+      setSnackbar({ open: true, text: `${data.description}`, severity: "error" });
+    }
   };
 
   const handleSessionChange = (data) => {
@@ -301,6 +319,14 @@ function App() {
         sessionId: ongoingExperimentRef.current.sessionId
       })
     );
+  };
+
+  const handleRecordingList = (data) => {
+    setRecordings(data);
+  };
+
+  const handleCheckPostProcessing = (data) => {
+    setPostProcessingStatus(data);
   };
 
   const handleFiltersData = (data) => {
@@ -383,6 +409,18 @@ function App() {
     connection.sendMessage("STOP_EXPERIMENT", {});
   };
 
+  const onGetRecordingList = () => {
+    connection.sendMessage("GET_RECORDING_LIST", {});
+  };
+
+  const onPostProcessingVideo = (sessionId) => {
+    connection.sendMessage("POST_PROCESSING_VIDEO", { session_id: sessionId });
+  };
+
+  const onCheckPostProcessing = () => {
+    connection.sendMessage("CHECK_POST_PROCESSING", {});
+  };
+
   const toggleModal = (modal) => {
     dispatch(toggleSingleTab(modal));
   };
@@ -423,7 +461,20 @@ function App() {
             element={
               <PageTemplate
                 title={"Post-Processing Room"}
-                customComponent={<PostProcessing />}
+                customComponent={
+                  <PostProcessing
+                    status={status}
+                    recordings={recordings}
+                    connection={connection}
+                    connectionState={connectionState}
+                    errorMessage={errorPostProc}
+                    successMessage={successPostProc}
+                    onPostProcessingVideo={onPostProcessingVideo}
+                    onCheckPostProcessing={onCheckPostProcessing}
+                    onGetRecordingList={onGetRecordingList}
+                  />
+                }
+                centerContentOnYAxis={true}
                 buttonListComponent={
                   <HeaderActionArea
                     buttons={[

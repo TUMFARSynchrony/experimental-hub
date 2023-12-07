@@ -12,5 +12,9 @@
   "ssl_key": "./certificate/key.key",
   "ping_subprocesses": 0.0,
   "experimenter_multiprocessing": false,
-  "participant_multiprocessing": true
+  "participant_multiprocessing": true,
+  "post_processing": {
+    "port": 6000,
+    "time_sleep": 1
+  }
 }

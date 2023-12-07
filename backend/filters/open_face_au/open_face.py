@@ -1,10 +1,14 @@
+import logging
 import subprocess
 import os
 
 
 class OpenFace:
+    """Class for running OpenFace as an external process."""
+
     def __init__(self, port: int):
         try:
+            self._logger = logging.getLogger("OpenFace")
             # Adjust environment variables for better performance
             env = os.environ.copy()
             env["OMP_NUM_THREADS"] = "1"
@@ -33,8 +37,8 @@ class OpenFace:
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
             )
-        except Exception:
-            pass
+        except Exception as error:
+            self._logger.error(f"Error running OwnExtractor. Port: {port}. Exception: {error}")
 
     def __del__(self):
         try:

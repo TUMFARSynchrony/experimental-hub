@@ -185,6 +185,7 @@ function ApiTests(props: { connection: Connection }): JSX.Element {
   const [participantId, setParticipantId] = useState(props.connection.participantId ?? "");
   const [mutedVideo, setMutedVideo] = useState(false);
   const [mutedAudio, setMutedAudio] = useState(false);
+  const [videoFilename, setVideoFilename] = useState("");
 
   useEffect(() => {
     /**
@@ -209,6 +210,7 @@ function ApiTests(props: { connection: Connection }): JSX.Element {
     const handleExperimentStarted = (data: any) =>
       saveGenericApiResponse("EXPERIMENT_STARTED", data);
     const handleKickNotification = (data: any) => saveGenericApiResponse("KICK_NOTIFICATION", data);
+    const handleRecordingList = (data: any) => saveGenericApiResponse("RECORDING_LIST", data);
     const handlePong = async (data: any) => {
       saveGenericApiResponse("PONG", data);
       if ("time" in data.ping_data) {
@@ -232,6 +234,7 @@ function ApiTests(props: { connection: Connection }): JSX.Element {
     props.connection.api.on("EXPERIMENT_STARTED", handleExperimentStarted);
     props.connection.api.on("KICK_NOTIFICATION", handleKickNotification);
     props.connection.api.on("PONG", handlePong);
+    props.connection.api.on("RECORDING_LIST", handleRecordingList);
     props.connection.api.on("GET_FILTERS_DATA", handleGetFiltersData);
     props.connection.api.on(
       "GET_FILTERS_DATA_SEND_TO_PARTICIPANT",
@@ -251,6 +254,7 @@ function ApiTests(props: { connection: Connection }): JSX.Element {
       props.connection.api.off("EXPERIMENT_STARTED", handleExperimentStarted);
       props.connection.api.off("KICK_NOTIFICATION", handleKickNotification);
       props.connection.api.off("PONG", handlePong);
+      props.connection.api.off("RECORDING_LIST", handleRecordingList);
       props.connection.api.off("GET_FILTERS_DATA", handleGetFiltersData);
       props.connection.api.off(
         "GET_FILTERS_DATA_SEND_TO_PARTICIPANT",
@@ -421,6 +425,39 @@ function ApiTests(props: { connection: Connection }): JSX.Element {
         </button>
       </div>
       <SetFilterPresets connection={props.connection} />
+      <p className="apiSubsectionHeader">Post-processing:</p>
+      <div className="requestButtons">
+        <button
+          onClick={() => props.connection.sendMessage("GET_RECORDING_LIST", {})}
+          disabled={props.connection.state !== ConnectionState.CONNECTED}
+        >
+          GET_RECORDING_LIST
+        </button>
+        <div className="inputBtnBox">
+          <input
+            type="text"
+            placeholder="Session ID"
+            onChange={(e) => setSessionId(e.target.value)}
+            value={sessionId}
+          />
+          <button
+            onClick={() =>
+              props.connection.sendMessage("POST_PROCESSING_VIDEO", {
+                session_id: sessionId
+              })
+            }
+            disabled={props.connection.state !== ConnectionState.CONNECTED}
+          >
+            POST_PROCESSING_VIDEO
+          </button>
+          <button
+            onClick={() => props.connection.sendMessage("CHECK_POST_PROCESSING", {})}
+            disabled={props.connection.state !== ConnectionState.CONNECTED}
+          >
+            CHECK_POST_PROCESSING
+          </button>
+        </div>
+      </div>
       <div className="basicTabs">
         <span className="tabsTitle">Responses:</span>
         {responses.map((response, index) => {

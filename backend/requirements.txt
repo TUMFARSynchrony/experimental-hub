@@ -17,3 +17,4 @@ pyzmq~=25.0.0
 NamedAtomicLock~=1.1.3
 
 pyts~=0.13.0
+jsonpickle~=3.0.2
