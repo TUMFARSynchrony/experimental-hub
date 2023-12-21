@@ -6,7 +6,7 @@ import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import styled from "@mui/material/styles/styled";
-import { ActionIconButton, LinkActionButton } from "../../components/atoms/Button";
+import { ActionIconButton, ActionButton } from "../../components/atoms/Button";
 import SessionCard from "../../components/organisms/SessionCard/SessionCard";
 import SessionPreview from "../../components/organisms/SessionPreview/SessionPreview";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
@@ -56,7 +56,7 @@ function SessionOverview({ onDeleteSession, onJoinExperiment, onCreateExperiment
     <>
       <div className="flex flex-col justify-center items-center py-10">
         <div>
-          <LinkActionButton
+          <ActionButton
             text="CREATE NEW EXPERIMENT"
             path="/sessionForm"
             variant="contained"

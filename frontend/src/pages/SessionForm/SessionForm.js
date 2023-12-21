@@ -19,7 +19,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useEffect, useRef, useState } from "react";
-import { ActionButton, ActionIconButton, LinkButton } from "../../components/atoms/Button";
+import { ActionButton, ActionIconButton } from "../../components/atoms/Button";
 import CustomSnackbar from "../../components/atoms/CustomSnackbar/CustomSnackbar";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import {
@@ -224,7 +224,12 @@ function SessionForm({ onSendSessionToBackend }) {
             <div className="px-4 flex flex-col h-full">
               <div className="flex justify-start items-center">
                 <ChevronLeft sx={{ color: "gray" }} />
-                <LinkButton text="Back to Session Overview" variant="text" size="small" path="/" />
+                <ActionButton
+                  text="Back to Session Overview"
+                  variant="text"
+                  size="small"
+                  path="/"
+                />
               </div>
               <CardContent>
                 {/* Override text fields' margin and width using MUI classnames */}

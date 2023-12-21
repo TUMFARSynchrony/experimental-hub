@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionButton, LinkActionButton } from "../../components/atoms/Button";
+import { ActionButton } from "../../components/atoms/Button";
 import Heading from "../../components/atoms/Heading/Heading";
 
 type Props = {
@@ -24,7 +24,7 @@ function EndVerificationModal({ setShowModal, onEndExperiment }: Props) {
           size="small"
           onClick={() => setShowModal(false)}
         />
-        <LinkActionButton
+        <ActionButton
           text="Yes"
           path="/"
           variant="contained"
