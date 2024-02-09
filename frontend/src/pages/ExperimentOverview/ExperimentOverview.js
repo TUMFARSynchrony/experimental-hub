@@ -8,18 +8,16 @@ import { ChatTab } from "../../components/molecules/ChatTab/ChatTab";
 import {
   selectChatTab,
   selectInstructionsTab,
-  selectParticipantsTab,
-  selectFilterInformationTab
+  selectParticipantsTab
 } from "../../redux/slices/tabsSlice";
 import ParticipantsTab from "../../components/molecules/ParticipantsTab/ParticipantsTab";
-import { InstructionsTab } from "../../components/molecules/InstructionsTab/InstructionsTab";
-import "./WatchingRoom.css";
+import InstructionsTab from "../../components/molecules/InstructionsTab/InstructionsTab";
+import "./ExperimentOverview.css";
 import StartVerificationModal from "../../modals/StartVerificationModal/StartVerificationModal";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import EndVerificationModal from "../../modals/EndVerificationModal/EndVerificationModal";
-import { FilterInformationTab } from "../../components/molecules/FilterInformationTab/FilterInformationTab";
 
-function WatchingRoom({
+function ExperimentOverview({
   connectedParticipants,
   onKickBanParticipant,
   onChat,
@@ -27,8 +25,7 @@ function WatchingRoom({
   onLeaveExperiment,
   onMuteParticipant,
   onStartExperiment,
-  onEndExperiment,
-  onGetFiltersData
+  onEndExperiment
 }) {
   const [startVerificationModal, setStartVerificationModal] = useState(false);
   const [endVerificationModal, setEndVerificationModal] = useState(false);
@@ -38,8 +35,6 @@ function WatchingRoom({
   const isChatModalActive = useAppSelector(selectChatTab);
   const isInstructionsModalActive = useAppSelector(selectInstructionsTab);
   const isParticipantsModalActive = useAppSelector(selectParticipantsTab);
-  const isFilterInformationModalActive = useAppSelector(selectFilterInformationTab);
-
   return (
     <div className="h-[calc(100vh-84px)] w-full">
       {sessionData ? (
@@ -118,13 +113,7 @@ function WatchingRoom({
                 onMuteParticipant={onMuteParticipant}
               />
             )}
-            {isInstructionsModalActive && <InstructionsTab />}
-            {isFilterInformationModalActive && (
-              <FilterInformationTab
-                onGetFiltersData={onGetFiltersData}
-                participants={sessionData["participants"]}
-              />
-            )}
+            {isInstructionsModalActive && <InstructionsTab onInstructionsCheckChange={false} />}
           </div>
         </div>
       ) : (
@@ -137,4 +126,4 @@ function WatchingRoom({
   );
 }
 
-export default WatchingRoom;
+export default ExperimentOverview;

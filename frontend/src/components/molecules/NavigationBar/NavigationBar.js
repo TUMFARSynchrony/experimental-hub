@@ -10,7 +10,7 @@ const GreyToolbar = styled(Toolbar)(() => ({
 
 // This is the toolbar view for the experimenter, with navigation links to session overview,
 // and the post processing room. It is intentionally not displayed in the session form screen
-// and watching room to prevent multiple navigation possibilities.
+// and experiment overview to prevent multiple navigation possibilities.
 function NavigationBar() {
   return (
     <>

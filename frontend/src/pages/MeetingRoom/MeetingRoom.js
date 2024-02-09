@@ -1,16 +1,16 @@
 import Typography from "@mui/material/Typography";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import VideoCanvas from "../../components/organisms/VideoCanvas/VideoCanvas";
 import ConnectionState from "../../networking/ConnectionState";
 import { useAppSelector } from "../../redux/hooks";
 import { selectCurrentSession } from "../../redux/slices/sessionsListSlice";
-import VideoCanvas from "../../components/organisms/VideoCanvas/VideoCanvas";
 import { ChatTab } from "../../components/molecules/ChatTab/ChatTab";
 import { selectChatTab, selectInstructionsTab } from "../../redux/slices/tabsSlice";
 import InstructionsTab from "../../components/molecules/InstructionsTab/InstructionsTab";
-import { ActionButton } from "../../components/atoms/Button";
+import "./MeetingRoom.css";
 
-function Lobby({ localStream, connection, onGetSession, onChat }) {
+function MeetingRoom({ localStream, connection, onGetSession, onChat }) {
   const videoElement = useRef(null);
   const [connectionState, setConnectionState] = useState(null);
   const [connectedParticipants, setConnectedParticipants] = useState([]);
@@ -21,14 +21,11 @@ function Lobby({ localStream, connection, onGetSession, onChat }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const sessionIdParam = searchParams.get("sessionId");
   const participantIdParam = searchParams.get("participantId");
-  const [areInstructionsChecked, setAreInstructionsChecked] = useState(false);
-
   useEffect(() => {
     if (connection && connectionState === ConnectionState.CONNECTED) {
       onGetSession(sessionIdParam);
     }
   }, [connection, connectionState, onGetSession, sessionIdParam]);
-
   const connectedPeersChangeHandler = async (peers) => {
     console.groupCollapsed("%cConnection peer streams change Handler", "color:blue");
     console.groupEnd();
@@ -40,12 +37,12 @@ function Lobby({ localStream, connection, onGetSession, onChat }) {
     connection.on("connectionStateChange", stateChangeHandler);
     connection.on("connectedPeersChange", connectedPeersChangeHandler);
     return () => {
+      // Remove event handlers when component is deconstructed
       connection.off("remoteStreamChange", streamChangeHandler);
       connection.off("connectionStateChange", stateChangeHandler);
       connection.off("connectedPeersChange", connectedPeersChangeHandler);
     };
   }, [connection]);
-
   useEffect(() => {
     setParticipantStream(localStream);
   }, [localStream]);
@@ -59,24 +56,29 @@ function Lobby({ localStream, connection, onGetSession, onChat }) {
   const streamChangeHandler = async () => {
     console.log("%cRemote Stream Change Handler", "color:blue");
   };
-
+  /** Handle `connectionStateChange` event of {@link Connection} */
   const stateChangeHandler = async (state) => {
     setConnectionState(state);
   };
-
   return (
     <>
+      {/* Grid takes up screen space left from the AppToolbar */}
       <div className="flex h-[calc(100vh-84px)]">
         <div className="px-6 py-4 w-3/4 flex flex-col">
           {participantStream ? (
-            <video
-              ref={videoElement}
-              autoPlay
-              playsInline
-              width="50%"
-              height="auto"
-              className="mx-auto" // Center the video horizontally
-            ></video>
+            sessionData && connectedParticipants ? (
+              <VideoCanvas
+                connectedParticipants={connectedParticipants}
+                sessionData={sessionData}
+                localStream={connection.remoteStream}
+                ownParticipantId={participantIdParam}
+              />
+            ) : (
+              <div className="loader">
+                You are being directed to the meeting room... /n If it takes longer than a few
+                minutes, please refresh the page and fill out the consent form again.{" "}
+              </div>
+            )
           ) : (
             <Typography>
               Unable to access your video. Please check that you have allowed access to your camera
@@ -96,20 +98,12 @@ function Lobby({ localStream, connection, onGetSession, onChat }) {
           )}
 
           {connectionState === ConnectionState.CONNECTED && isInstructionsModalActive && (
-            <InstructionsTab onInstructionsCheckChange={setAreInstructionsChecked} />
+            <InstructionsTab />
           )}
         </div>
-      </div>
-      <div className="self-center h-fit">
-        <a
-          href={`${window.location.origin}/meetingRoom?participantId=${participantIdParam}&sessionId=${sessionIdParam}`}
-          className={!areInstructionsChecked ? "pointer-events-none" : ""}
-        >
-          <ActionButton text="Continue" variant="contained" disabled={!areInstructionsChecked} />
-        </a>
       </div>
     </>
   );
 }
 
-export default Lobby;
+export default MeetingRoom;

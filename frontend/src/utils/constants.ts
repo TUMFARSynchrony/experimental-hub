@@ -97,7 +97,7 @@ function parseIceServers() {
 
 export const PARTICIPANT_HOST = "http://localhost:3000/lobby/";
 
-// Displays the same set of instructions in both the /lobby and in the /watchingRoom.
+// Displays the same set of instructions in both the /lobby and in the /experimentOverview.
 export const instructionsList = [
   "Please remove any glasses, caps or other such articles if you are wearing any.",
   "Ensure that your surrounding lighting is good.",

@@ -1,8 +1,8 @@
-.watchingRoomHeader {
+.experimentOverviewHeader {
   background-color: hsl(212, 86%, 64%);
 }
 
-.watchingRoomHeader > h2 {
+.experimentOvervieweader > h2 {
   font-weight: 400;
   font-size: xx-large;
   color: white;

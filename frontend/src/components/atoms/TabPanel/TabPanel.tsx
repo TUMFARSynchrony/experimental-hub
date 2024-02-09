@@ -8,7 +8,7 @@ type TabPanelProps = {
   value: number;
 };
 
-// This component is currently unused, it can be used in the watching room to
+// This component is currently unused, it can be used in the experiment overview to
 // replace the "Overview", "Notes" and "Participants" tabs.
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;

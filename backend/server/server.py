@@ -77,7 +77,7 @@ class Server:
                 "/",
                 "/postProcessingRoom",
                 "/lobby",
-                "/watchingRoom",
+                "/experimentOverview",
                 "/sessionForm",
                 "/connectionTest",
                 "/connectionLatencyTest",

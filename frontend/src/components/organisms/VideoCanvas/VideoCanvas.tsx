@@ -45,9 +45,6 @@ function VideoCanvas({ connectedParticipants, sessionData, ownParticipantId, loc
         ) : null}
         {/* Render videos for other connected participants */}
         {connectedParticipants?.map((peer: any, i: number) => {
-          if (peer.id === ownParticipantId) {
-            return null; // Skip rendering the participant's own video again
-          }
           const participantData =
             typeof peer.summary === "string"
               ? getParticipantById(peer.summary, sessionData)
