@@ -14,11 +14,15 @@ import traceback
 from abc import ABCMeta, abstractmethod
 from typing import Callable, Any, Coroutine
 from pyee.asyncio import AsyncIOEventEmitter
-from collections import deque
-
-from connection.messages import ConnectionOfferDict, is_valid_connection_offer_dict
+from connection.messages.rtc_ice_candidate_dict import RTCIceCandidateDict
+from custom_types.success import SuccessDict
 from custom_types.ping import PongDict, PingDict
 from custom_types.error import ErrorDict
+from connection.messages import (
+    ConnectionOfferDict, is_valid_connection_offer_dict,
+    AddIceCandidateDict, is_valid_add_ice_candidate_dict
+)
+from collections import deque
 from filters import FilterDict
 from filters.filters_data_dict import FiltersDataDict
 from custom_types.message import MessageDict
@@ -309,10 +313,33 @@ or connection is not fully connected"
                 msg = MessageDict(type="CONNECTION_ANSWER", data=answer)
                 await user.send(msg)
 
+        @user.on("ADD_ICE_CANDIDATE")
+        async def _handle_add_ice_candidate(candidate: AddIceCandidateDict):
+            if self._connection is None:
+                self._logger.error("Called _handle_add_ice_candidate with connection == None")
+                return
+
+            if candidate["id"] == proposal["id"]:
+                try:
+                    await self._connection.handle_subscriber_add_ice_candidate(candidate)
+                except ErrorDictException as err:
+                    await user.send(err.error_message)
+                    return
+                success = SuccessDict(
+                    type="ADD_ICE_CANDIDATE",
+                    description="Successfully added ice candidate"
+                )
+                msg = MessageDict(type="SUCCESS", data=success)
+                await user.send(msg)
+
         @self.on("disconnected")
         def _remove_listener(_):
             try:
                 user.remove_listener("CONNECTION_OFFER", _handle_offer)
+                user.remove_listener(
+                    "ADD_ICE_CANDIDATE",
+                    _handle_add_ice_candidate
+                )
             except KeyError:
                 return
 
@@ -396,6 +423,19 @@ or connection is not fully connected"
                 return
             self.emit("CONNECTION_OFFER", message["data"])
             return
+        
+        if endpoint == "ADD_ICE_CANDIDATE":
+            if not is_valid_add_ice_candidate_dict(message["data"]):
+                self._logger.warning("Received invalid ADD_ICE_CANDIDATE")
+                err = ErrorDict(
+                    code=400,
+                    type="INVALID_DATATYPE",
+                    description="Invalid add ice candidate dict",
+                )
+                await self.send(MessageDict(type="ERROR", data=err))
+                return
+            self.emit("ADD_ICE_CANDIDATE", message["data"])
+            return
 
         handler_functions = self._handlers.get(endpoint, None)
 
@@ -426,6 +466,17 @@ or connection is not fully connected"
 
             if response is not None:
                 await self.send(response)
+
+    async def handle_add_ice_candidate(self, candidate: RTCIceCandidateDict):
+        """Handle an new ice candidate which was send by the client
+        while establishing the main connection.
+
+        Parameters
+        ----------
+        candidate : connection.messages.rtc_ice_candidate_dict.RTCIceCandidateDict
+            New ice candidate send by the client.
+        """
+        await self._connection.handle_add_ice_candidate(candidate)
 
     def get_experiment_or_raise(self, action_prefix: str = "") -> _exp.Experiment:
         """Get `self._experiment` or raise ErrorDictException if it is None.

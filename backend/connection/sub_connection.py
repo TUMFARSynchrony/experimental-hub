@@ -1,6 +1,7 @@
 import logging
 
-from aiortc import RTCPeerConnection, MediaStreamTrack, RTCSessionDescription
+from aiortc import (RTCPeerConnection, MediaStreamTrack,
+                    RTCSessionDescription, RTCIceCandidate)
 from pyee.asyncio import AsyncIOEventEmitter
 
 from connection.messages import (
@@ -134,3 +135,17 @@ class SubConnection(AsyncIOEventEmitter):
         self._logger.debug(f"Peer Connection state change: {self._pc.connectionState}")
         if self._pc.connectionState in ["closed", "failed"]:
             await self.stop()
+
+    async def handle_add_ice_candidate(self, candidate: RTCIceCandidate):
+        """Handle a `ADD_ICE_CANDIDATE` message for this SubConnection.
+
+        Parameters
+        ----------
+        candidate : aiortc.RTCIceCandidate
+            New ICE candidate.
+
+        See Also
+        --------
+        Connection Protocol Wiki :
+        """
+        await self._pc.addIceCandidate(candidate)

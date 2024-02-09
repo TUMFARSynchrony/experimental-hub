@@ -1,6 +1,6 @@
 import Connection from "./Connection";
 import ConnectionBase from "./ConnectionBase";
-import { ConnectionAnswer, ConnectionOffer, ConnectionProposal } from "./typing";
+import { ConnectionAnswer, ConnectionOffer, ConnectionProposal, IceCandidate } from "./typing";
 
 /**
  * SubConnection class used by {@link Connection} to get streams of other users from the backend.
@@ -42,6 +42,18 @@ export default class SubConnection extends ConnectionBase<MediaStream | string> 
   public async sendOffer() {
     this.log("Generating & sending offer");
     const offer = await this.createOffer();
+
+    // from now on new ice candidates need to be sent to the backend server
+    this.pc.addEventListener(
+      "icecandidate",
+      (e) => {
+        if (e.candidate) {
+          this.handleIceCandidate(e.candidate);
+        }
+      },
+      false
+    );
+
     const connectionOffer: ConnectionOffer = {
       id: this.id,
       offer: offer
@@ -89,5 +101,15 @@ export default class SubConnection extends ConnectionBase<MediaStream | string> 
     if (["disconnected", "closed", "failed"].includes(this.pc.iceConnectionState)) {
       this.stop();
     }
+  }
+
+  protected async handleIceCandidate(candidate: RTCIceCandidate): Promise<void> {
+    const candidateMessage: IceCandidate = {
+      candidate: candidate,
+      id: this.id
+    };
+    this.connection.sendMessage("ADD_ICE_CANDIDATE", candidateMessage);
+
+    return;
   }
 }

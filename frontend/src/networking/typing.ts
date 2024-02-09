@@ -69,6 +69,14 @@ export type ConnectionAnswer = {
 };
 
 /**
+ * New ICE candidate.
+ */
+export type IceCandidate = {
+  id: string;
+  candidate: RTCIceCandidate;
+};
+
+/**
  * Check if `data` is a valid {@link ConnectionAnswer}.
  * Only checks if the required fields exist, not for unwanted fields or invalid contents.
  *

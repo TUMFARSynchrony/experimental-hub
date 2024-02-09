@@ -7,9 +7,11 @@ import {
   isValidConnectionAnswer,
   isValidMessage,
   Message,
-  ConnectedPeer
+  ConnectedPeer,
+  IceCandidate
 } from "./typing";
 import SubConnection from "./SubConnection";
+import { v4 as uuid } from "uuid";
 
 /**
  * Class handling the connection with the backend.
@@ -48,6 +50,7 @@ export default class Connection extends ConnectionBase<
   readonly participantId?: string;
   readonly experimenterPassword?: string;
   readonly userType: "participant" | "experimenter";
+  readonly id: string; // unique id for this connection used to assign candidates to the correct connection
 
   private _state: ConnectionState;
   private localStream: MediaStream;
@@ -91,6 +94,7 @@ export default class Connection extends ConnectionBase<
     this.userType = userType;
     this.subConnections = new Map();
     this._state = ConnectionState.NEW;
+    this.id = uuid();
 
     this.api = new EventHandler();
     this.api.on("CONNECTION_PROPOSAL", this.handleConnectionProposal.bind(this));
@@ -306,11 +310,23 @@ export default class Connection extends ConnectionBase<
   private async negotiate() {
     const offer = await this.createOffer();
 
+    // from now on new ice candidates need to be sent to the backend server
+    this.pc.addEventListener(
+      "icecandidate",
+      (e) => {
+        if (e.candidate) {
+          this.handleIceCandidate(e.candidate);
+        }
+      },
+      false
+    );
+
     let request;
     if (this.userType === "participant") {
       request = {
         sdp: offer.sdp,
         type: offer.type,
+        connection_id: this.id,
         user_type: "participant",
         session_id: this.sessionId,
         participant_id: this.participantId
@@ -319,6 +335,7 @@ export default class Connection extends ConnectionBase<
       request = {
         sdp: offer.sdp,
         type: offer.type,
+        connection_id: this.id,
         user_type: "experimenter",
         experimenter_password: this.experimenterPassword
       };
@@ -407,5 +424,42 @@ export default class Connection extends ConnectionBase<
       return;
     }
     subConnection.handleAnswer(data);
+  }
+
+  protected async handleIceCandidate(candidate: RTCIceCandidate): Promise<void> {
+    const request: IceCandidate = {
+      id: this.id,
+      candidate: candidate
+    };
+
+    this.log("Sending ICE candidate");
+
+    let response;
+    try {
+      response = await fetch(BACKEND + "/addIceCandidate", {
+        body: JSON.stringify({ request }),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "POST",
+        mode: ENVIRONMENT === "development" ? "cors" : undefined
+      });
+    } catch (error) {
+      this.logError("Failed to connect to backend.", error.message);
+      this.setState(ConnectionState.FAILED);
+      return;
+    }
+
+    if (!response.ok) {
+      this.logError("Failed to connect to backend. Response not ok");
+      this.setState(ConnectionState.FAILED);
+      return;
+    }
+
+    const answer = await response.json();
+    if (answer.type !== "SUCCESS") {
+      this.log("Received unexpected answer from backend. type:", answer.type);
+      return;
+    }
   }
 }

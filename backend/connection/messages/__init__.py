@@ -13,3 +13,6 @@ from .connection_answer_dict import (
     is_valid_connection_answer_dict,
 )
 from .connection_offer_dict import ConnectionOfferDict, is_valid_connection_offer_dict
+
+from .rtc_ice_candidate_dict import RTCIceCandidateDict, is_valid_rtc_ice_candidate_dict
+from .add_ice_candidate_dict import AddIceCandidateDict, is_valid_add_ice_candidate_dict

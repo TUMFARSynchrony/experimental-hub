@@ -106,8 +106,7 @@ export default abstract class ConnectionBase<T> extends EventHandler<T> {
   /**
    * Create a new Offer for this connection.
    *
-   * Calls `createOffer`, `setLocalDescription`, waits for iceGatheringState to be "complete"
-   * and returns `localDescription` of {@link pc}
+   * Calls `createOffer`, `setLocalDescription` and returns `localDescription` of {@link pc}
    *
    * @returns `localDescription` of {@link pc}
    */
@@ -119,21 +118,6 @@ export default abstract class ConnectionBase<T> extends EventHandler<T> {
 
     const offer = await this.pc.createOffer(options);
     await this.pc.setLocalDescription(offer);
-
-    // Wait for iceGatheringState to be "complete".
-    await new Promise((resolve) => {
-      if (this.pc?.iceGatheringState === "complete") {
-        resolve(undefined);
-      } else {
-        const checkState = () => {
-          if (this.pc?.iceGatheringState === "complete") {
-            this.pc.removeEventListener("icegatheringstatechange", checkState);
-            resolve(undefined);
-          }
-        };
-        this.pc?.addEventListener("icegatheringstatechange", checkState);
-      }
-    });
 
     return this.pc.localDescription;
   }
@@ -202,4 +186,9 @@ export default abstract class ConnectionBase<T> extends EventHandler<T> {
    * Handle the `iceconnectionstatechange` event on {@link pc}.
    */
   protected abstract handleIceConnectionStateChange(): void;
+
+  /**
+   * Handle the `icecandidate` event on {@link pc}.
+   */
+  protected abstract handleIceCandidate(candidate: RTCIceCandidate): void;
 }

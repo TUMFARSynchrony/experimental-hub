@@ -82,6 +82,7 @@ MESSAGE_TYPES = Literal[
     "ACTIVE_AUDIO_FILTERS",
     "PING",
     "PONG",
+    "ADD_ICE_CANDIDATE",
 ]
 """Possible message types for custom_types.message.MessageDict.
 

@@ -9,11 +9,13 @@ from os.path import join
 from aiortc import RTCSessionDescription
 from typing import Any, Callable, Coroutine, Tuple
 from asyncio.subprocess import Process, PIPE, create_subprocess_exec
+from connection.messages.rtc_ice_candidate_dict import RTCIceCandidateDict
 
 from connection.messages import (
     ConnectionAnswerDict,
     ConnectionOfferDict,
     RTCSessionDescriptionDict,
+    AddIceCandidateDict,
 )
 from hub import BACKEND_DIR
 from server import Config
@@ -150,6 +152,10 @@ class ConnectionSubprocess(ConnectionInterface):
         )
         return offer
 
+    async def handle_add_ice_candidate(self, candidate: RTCIceCandidateDict):
+        # For docstring see ConnectionInterface or hover over function declaration
+        await self._send_command("ADD_ICE_CANDIDATE", candidate)
+
     async def handle_subscriber_offer(
         self, offer: ConnectionOfferDict
     ) -> ConnectionAnswerDict:
@@ -157,6 +163,12 @@ class ConnectionSubprocess(ConnectionInterface):
         # Send command and wait for response.
         answer = await self._send_command_wait_for_response("HANDLE_OFFER", offer)
         return answer
+    
+    async def handle_subscriber_add_ice_candidate(
+        self, candidate: AddIceCandidateDict
+    ):
+        # For docstring see ConnectionInterface or hover over function declaration
+        await self._send_command("ADD_SUBSCRIBER_ICE_CANDIDATE", candidate)
 
     async def get_local_description(self) -> RTCSessionDescription:
         """Get localdescription.  Blocks until subprocess sends localdescription."""

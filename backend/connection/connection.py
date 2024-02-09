@@ -8,7 +8,10 @@ from aiortc import (
     RTCSessionDescription,
     MediaStreamTrack,
     RTCRtpSender,
+    RTCIceCandidate,
 )
+from aiortc.sdp import candidate_from_sdp
+
 import shortuuid
 import asyncio
 import logging
@@ -18,6 +21,7 @@ from connection.messages import (
     ConnectionAnswerDict,
     ConnectionOfferDict,
     ConnectionProposalDict,
+    AddIceCandidateDict,
 )
 from connection.sub_connection import SubConnection
 from hub.track_handler import TrackHandler
@@ -241,6 +245,23 @@ class Connection(ConnectionInterface):
         self._sub_connections[subconnection_id] = sc
         return sc.proposal
 
+    async def handle_add_ice_candidate(self, candidate: RTCIceCandidate):
+        # For docstring see ConnectionInterface or hover over function declaration
+
+        # Create ice candidate object
+        if candidate["candidate"] == '':
+            return
+
+        rtc_candidate = candidate_from_sdp(
+            candidate["candidate"].split(":", 1)[1]
+        )
+        rtc_candidate.sdpMid = candidate["sdpMid"]
+        rtc_candidate.sdpMLineIndex = candidate["sdpMLineIndex"]
+        rtc_candidate.usernameFragment = \
+            candidate["usernameFragment"]
+
+        await self._main_pc.addIceCandidate(rtc_candidate)
+
     async def handle_subscriber_offer(
         self, offer: ConnectionOfferDict
     ) -> ConnectionAnswerDict:
@@ -259,6 +280,32 @@ class Connection(ConnectionInterface):
             offer["offer"]["sdp"], offer["offer"]["type"]
         )
         return await sc.handle_offer(offer_description)
+
+    async def handle_subscriber_add_ice_candidate(
+        self, candidate: AddIceCandidateDict
+    ):
+        # For docstring see ConnectionInterface or hover over function declaration
+        subconnection_id = candidate["id"]
+        sc = self._sub_connections.get(subconnection_id)
+        if sc is None:
+            raise ErrorDictException(
+                code=0,
+                type="UNKNOWN_SUBCONNECTION_ID",
+                description=f"Unknown subconnection ID {subconnection_id}",
+            )
+
+        if candidate["candidate"]["candidate"] == '':
+            return
+
+        rtc_candidate = candidate_from_sdp(
+            candidate["candidate"]["candidate"].split(":", 1)[1]
+        )
+        rtc_candidate.sdpMid = candidate["candidate"]["sdpMid"]
+        rtc_candidate.sdpMLineIndex = candidate["candidate"]["sdpMLineIndex"]
+        rtc_candidate.usernameFragment = \
+            candidate["candidate"]["usernameFragment"]
+
+        await sc.handle_add_ice_candidate(rtc_candidate)
 
     async def stop_subconnection(self, subconnection_id: str) -> None:
         # For docstring see ConnectionInterface or hover over function declaration
