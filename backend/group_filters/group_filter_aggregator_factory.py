@@ -8,7 +8,7 @@ from hub.exceptions import ErrorDictException
 
 
 def create_group_filter_aggregator(
-    channel: str, group_filter_config: FilterDict, port: int
+    channel: str, group_filter_config: FilterDict, port_tuple: tuple[int, int]
 ) -> GroupFilterAggregator:
     group_filter_name = group_filter_config["name"]
 
@@ -21,4 +21,4 @@ def create_group_filter_aggregator(
             description=f"Unknown group filter type {group_filter_name}.",
         )
 
-    return GroupFilterAggregator(channel, group_filters[group_filter_name], port)
+    return GroupFilterAggregator(channel, group_filters[group_filter_name], *port_tuple)

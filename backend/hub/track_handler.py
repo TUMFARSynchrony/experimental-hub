@@ -24,7 +24,7 @@ from filters import (
     FilterDataDict,
 )
 from group_filters import GroupFilter, group_filter_factory, group_filter_utils
-from time import time_ns
+from time import time
 
 if TYPE_CHECKING:
     from connection.connection import Connection
@@ -130,7 +130,12 @@ class TrackHandler(MediaStreamTrack):
 
         group_filter_ports = []
         for _ in group_filters:
-            group_filter_ports.append(group_filter_utils.find_an_available_port())
+            group_filter_ports.append(
+                (
+                    group_filter_utils.find_an_available_port(),  # To send individual data to the aggragator
+                    group_filter_utils.find_an_available_port(),  # To send the aggregation result to each participant
+                )
+            )
 
         await self.set_filters(filters)
         await self.set_group_filters(group_filters, group_filter_ports)
@@ -281,18 +286,18 @@ class TrackHandler(MediaStreamTrack):
         )
 
     async def set_group_filters(
-        self, group_filter_configs: list[FilterDict], ports: list[int]
+        self, group_filter_configs: list[FilterDict], ports: list[tuple[int, int]]
     ) -> None:
         async with self.__lock:
             await self._set_group_filters(group_filter_configs, ports)
 
     async def _set_group_filters(
-        self, group_filter_configs: list[FilterDict], ports: list[int]
+        self, group_filter_configs: list[FilterDict], ports: list[tuple[int, int]]
     ) -> None:
         old_group_filters = self._group_filters
 
         self._group_filters = {}
-        for config, port in zip(group_filter_configs, ports):
+        for config, port_tuple in zip(group_filter_configs, ports):
             filter_id = config["id"]
             # Reuse existing filter for matching id and type.
             if (
@@ -307,7 +312,7 @@ class TrackHandler(MediaStreamTrack):
             self._group_filters[filter_id] = group_filter_factory.create_group_filter(
                 config, self.connection._log_name_suffix[2:]
             )
-            self._group_filters[filter_id].connect_aggregator(port)
+            self._group_filters[filter_id].connect_aggregator(*port_tuple)
 
         coroutines: list[Coroutine] = []
         # Cleanup old filters
@@ -371,9 +376,9 @@ class TrackHandler(MediaStreamTrack):
 
         if self._execute_group_filters:
             if self.kind == "video":
-                await self._run_video_group_filters(frame)
+                frame = await self._run_video_group_filters(frame)
             else:
-                await self._run_audio_group_filters(frame)
+                frame = await self._run_audio_group_filters(frame)
 
         if self._execute_filters:
             if self.kind == "video":
@@ -392,9 +397,7 @@ class TrackHandler(MediaStreamTrack):
         ndarray = frame.to_ndarray(format="bgr24")
         ndarray = await self._apply_filters(frame, ndarray)
 
-        new_frame = VideoFrame.from_ndarray(ndarray, format="bgr24")
-        new_frame.time_base = frame.time_base
-        new_frame.pts = frame.pts
+        new_frame = self.__create_video_frame_from_ndarray(ndarray, frame)
         return new_frame
 
     async def _apply_audio_filters(self, frame: AudioFrame):
@@ -402,10 +405,7 @@ class TrackHandler(MediaStreamTrack):
         ndarray = frame.to_ndarray()
         ndarray = await self._apply_filters(frame, ndarray)
 
-        new_frame = AudioFrame.from_ndarray(ndarray)
-        new_frame.pts = frame.pts
-        new_frame.time_base = frame.time_base
-        new_frame.sample_rate = frame.sample_rate
+        new_frame = self.__create_audio_frame_from_ndarray(ndarray, frame)
         return new_frame
 
     async def _apply_filters(
@@ -426,21 +426,43 @@ class TrackHandler(MediaStreamTrack):
 
         return ndarray
 
-    async def _run_video_group_filters(self, frame: VideoFrame) -> None:
-        ndarray = frame.to_ndarray(format="bgr24")
-        await self._run_group_filters(frame, ndarray)
+    def __create_video_frame_from_ndarray(self, ndarray: numpy.ndarray, frame: VideoFrame):
+        new_frame = VideoFrame.from_ndarray(ndarray, format="bgr24")
+        new_frame.time_base = frame.time_base
+        new_frame.pts = frame.pts
+        return new_frame
 
-    async def _run_audio_group_filters(self, frame: AudioFrame) -> None:
+    def __create_audio_frame_from_ndarray(self, ndarray: numpy.ndarray, frame: AudioFrame):
+        new_frame = AudioFrame.from_ndarray(ndarray)
+        new_frame.pts = frame.pts
+        new_frame.time_base = frame.time_base
+        new_frame.sample_rate = frame.sample_rate
+        return new_frame
+
+    async def _run_video_group_filters(self, frame: VideoFrame) -> numpy.ndarray:
+        ndarray = frame.to_ndarray(format="bgr24")
+        ndarray = await self._run_group_filters(frame, ndarray)
+
+        new_frame = self.__create_video_frame_from_ndarray(ndarray, frame)
+        return new_frame
+
+    async def _run_audio_group_filters(self, frame: AudioFrame) -> numpy.ndarray:
         ndarray = frame.to_ndarray()
-        await self._run_group_filters(frame, ndarray)
+        ndarray = await self._run_group_filters(frame, ndarray)
+
+        new_frame = self.__create_audio_frame_from_ndarray(ndarray, frame)
+        return new_frame
 
     async def _run_group_filters(
         self, original: VideoFrame | AudioFrame, ndarray: numpy.ndarray
-    ) -> None:
+    ) -> numpy.ndarray:
         """Execute group filter individual frame processing pipeline."""
         async with self.__lock:
-            ts = time_ns()
+            frame_timestamp = time()
             for active_group_filter in self._group_filters.values():
-                await active_group_filter.process_individual_frame_and_send_data_to_aggregator(
-                    original, ndarray, ts
+                ndarray = (
+                    await active_group_filter.process_individual_frame_and_send_data_to_aggregator(
+                        original, ndarray, frame_timestamp
+                    )
                 )
+            return ndarray

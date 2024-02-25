@@ -201,13 +201,13 @@ class ConnectionSubprocess(ConnectionInterface):
         await self._send_command("SET_AUDIO_FILTERS", filters)
 
     async def set_video_group_filters(
-        self, group_filters: list[FilterDict], ports: list[int]
+        self, group_filters: list[FilterDict], ports: list[tuple[int, int]]
     ) -> None:
         # For docstring see ConnectionInterface or hover over function declaration
         await self._send_command("SET_VIDEO_GROUP_FILTERS", (group_filters, ports))
 
     async def set_audio_group_filters(
-        self, group_filters: list[FilterDict], ports: list[int]
+        self, group_filters: list[FilterDict], ports: list[tuple[int, int]]
     ) -> None:
         # For docstring see ConnectionInterface or hover over function declaration
         await self._send_command("SET_AUDIO_GROUP_FILTERS", (group_filters, ports))

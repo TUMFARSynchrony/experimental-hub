@@ -47,9 +47,9 @@ class TemplateGroupFilter(GroupFilter):
         return {
             # example of how a filter config can look like
             # add or delete this
-            # This would show that there is a string variable (direction) which can have different values
-            # and another int variable (size)
-            # in the frontend, we would then have either a dropdown (direction) or input number (size)
+            # This would show that there is a string variable (direction) which can have different
+            # values and another int variable (size)
+            # in the frontend, we would then have either a dropdown (direction) or input (size)
             # The values can be changed and sent back to the backend
             #
             #
@@ -85,4 +85,4 @@ class TemplateGroupFilter(GroupFilter):
         # TODO: Change this to implement the aggregation step.
         # Needs to be implemented as a static method.
         np_data = np.array(data)
-        return np_data.std(axis=0)
+        return np_data.std(axis=0)[0]

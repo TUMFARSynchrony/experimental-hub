@@ -2,6 +2,7 @@ import numpy
 from av import VideoFrame
 
 from filters.filter import Filter
+from filters.filter_data_dict import FilterDataDict
 from filters.simple_line_writer import SimpleLineWriter
 from filters.open_face_au.open_face_au_extractor import OpenFaceAUExtractor
 from .open_face_data_parser import OpenFaceDataParser
@@ -40,22 +41,20 @@ class OpenFaceAUFilter(Filter):
     def channel() -> str:
         return "video"
 
+    async def get_filter_data(self) -> None | FilterDataDict:
+        return FilterDataDict(
+            id=self.id,
+            data={"data": self.data},
+        )
+
     async def process(
         self, original: VideoFrame, ndarray: numpy.ndarray
     ) -> numpy.ndarray:
         self.frame = self.frame + 1
 
-        # If ROI is sent from the OpenFace, only send that region
-        if "roi" in self.data.keys() and self.data["roi"]["width"] != 0:
-            roi = self.data["roi"]
-            exit_code, msg, result = self.au_extractor.extract(
-                ndarray[
-                    roi["y"] : (roi["y"] + roi["height"]),
-                    roi["x"] : (roi["x"] + roi["width"]),
-                ]
-            )
-        else:
-            exit_code, msg, result = self.au_extractor.extract(ndarray)
+        exit_code, msg, result = self.au_extractor.extract(
+            ndarray, self.data.get("roi", None)
+        )
 
         if exit_code == 0:
             self.data = result

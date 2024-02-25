@@ -178,7 +178,7 @@ class ConnectionInterface(AsyncIOEventEmitter, metaclass=ABCMeta):
 
     @abstractmethod
     async def set_video_group_filters(
-        self, group_filters: list[FilterDict], ports: list[int]
+        self, group_filters: list[FilterDict], ports: list[tuple[int, int]]
     ) -> None:
         """Set or update video filters to `filters`.
 
@@ -186,12 +186,14 @@ class ConnectionInterface(AsyncIOEventEmitter, metaclass=ABCMeta):
         ----------
         filters : list of filters.FilterDict
             List of video filter configs.
+        ports: list of tuples of int
+            List of tuples of ports that the group filter commnunicates with the aggregator
         """
         pass
 
     @abstractmethod
     async def set_audio_group_filters(
-        self, group_filters: list[FilterDict], ports: list[int]
+        self, group_filters: list[FilterDict], ports: list[tuple[int, int]]
     ) -> None:
         """Set or update audio filters to `filters`.
 
@@ -199,6 +201,8 @@ class ConnectionInterface(AsyncIOEventEmitter, metaclass=ABCMeta):
         ----------
         filters : list of filters.FilterDict
             List of audio filter configs.
+        ports: list of tuples of int
+            List of tuples of ports that the group filter commnunicates with the aggregator
         """
         pass
 

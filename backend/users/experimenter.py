@@ -765,12 +765,22 @@ class Experimenter(User):
         video_group_filters = data["video_group_filters"]
         video_group_filter_ports = []
         for _ in video_group_filters:
-            video_group_filter_ports.append(group_filter_utils.find_an_available_port())
+            video_group_filter_ports.append(
+                (
+                    group_filter_utils.find_an_available_port(),  # To send individual data to the aggragator
+                    group_filter_utils.find_an_available_port(),  # To send the aggregation result to each participant
+                )
+            )
 
         audio_group_filters = data["audio_group_filters"]
         audio_group_filter_ports = []
         for _ in audio_group_filters:
-            audio_group_filter_ports.append(group_filter_utils.find_an_available_port())
+            audio_group_filter_ports.append(
+                (
+                    group_filter_utils.find_an_available_port(),  # To send individual data to the aggragator
+                    group_filter_utils.find_an_available_port(),  # To send the aggregation result to each participant
+                )
+            )
 
         experiment = self.get_experiment_or_raise("Failed to set filters.")
         coroutines = []

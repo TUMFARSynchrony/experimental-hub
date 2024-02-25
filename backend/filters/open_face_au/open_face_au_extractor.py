@@ -4,43 +4,61 @@ import json
 import cv2
 import numpy
 import zmq
+from socket import socket
 
 from filters.open_face_au.open_face import OpenFace
-from filters.open_face_au.port_manager import PortManager
+
+
+def find_an_available_port(addr: str = "") -> int:
+    with socket() as s:
+        s.bind((addr, 0))
+        return s.getsockname()[1]
 
 
 class OpenFaceAUExtractor:
-    port_manager: PortManager
     open_face: OpenFace
+    context: zmq.Context
     socket: zmq.Socket
     is_extracting: bool
     is_connected: bool
+    __openface_port: int
 
     def __init__(self):
-        self.port_manager = PortManager()
+        self.__openface_port = find_an_available_port()
 
-        self.open_face = OpenFace(self.port_manager.port)
+        self.open_face = OpenFace(self.__openface_port)
 
-        context = zmq.Context()
-        self.socket = context.socket(zmq.REQ)
+        self.context = zmq.Context.instance()
+        self.socket = self.context.socket(zmq.PAIR)
         try:
-            self.socket.bind(f"tcp://127.0.0.1:{self.port_manager.port}")
+            self.socket.bind(f"tcp://127.0.0.1:{self.__openface_port}")
             self.is_connected = True
         except zmq.ZMQError as e:
             self.is_connected = False
-            print(f"ZMQError: {e}")
+            print(f"ZMQError while connecting port {self.__openface_port}: {e}")
 
         self.is_extracting = False
 
     def __del__(self):
+        self.is_connected = False
         self.socket.close()
-        del self.port_manager, self.open_face
+        self.context.destroy()
+        del self.open_face
 
-    def extract(self, ndarray: numpy.ndarray) -> tuple[int, str, object]:
-        port_msg = f"Port: {self.port_manager.port}"
+    def extract(
+        self, ndarray: numpy.ndarray, roi: dict[str, int] = None
+    ) -> tuple[int, str, object]:
+        # If ROI is sent from the OpenFace, only send that region
+        if roi is not None and roi["width"] > 2:
+            ndarray = ndarray[
+                roi["y"] : (roi["y"] + roi["height"]),
+                roi["x"] : (roi["x"] + roi["width"]),
+            ]
+
+        port_msg = f"Port: {self.__openface_port}"
 
         if not self.is_connected:
-            return -1, f"Port {self.port_manager.port} is already taken!", None
+            return -1, f"Port {self.__openface_port} is already taken!", None
 
         result = None
         received = False
@@ -64,7 +82,7 @@ class OpenFaceAUExtractor:
             else:
                 return 1, port_msg, result
         else:
-            return -2, f"No connection established on {self.port_manager.port}", result
+            return -2, f"No connection established on {self.__openface_port}", result
 
     def _start_extraction(self, ndarray: numpy.ndarray) -> bool:
         is_success, image_enc = cv2.imencode(".png", ndarray)

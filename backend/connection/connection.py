@@ -301,13 +301,13 @@ class Connection(ConnectionInterface):
         await self._incoming_audio.set_filters(filters)
 
     async def set_video_group_filters(
-        self, group_filters: list[FilterDict], ports: list[int]
+        self, group_filters: list[FilterDict], ports: list[tuple[int, int]]
     ) -> None:
         # For docstring see ConnectionInterface or hover over function declaration
         await self._incoming_video.set_group_filters(group_filters, ports)
 
     async def set_audio_group_filters(
-        self, group_filters: list[FilterDict], ports: list[int]
+        self, group_filters: list[FilterDict], ports: list[tuple[int, int]]
     ) -> None:
         # For docstring see ConnectionInterface or hover over function declaration
         await self._incoming_audio.set_group_filters(group_filters, ports)
