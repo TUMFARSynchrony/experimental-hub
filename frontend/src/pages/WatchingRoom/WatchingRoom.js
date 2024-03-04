@@ -4,8 +4,9 @@ import { useAppSelector } from "../../redux/hooks";
 import { selectOngoingExperiment } from "../../redux/slices/ongoingExperimentSlice";
 import { selectSessions } from "../../redux/slices/sessionsListSlice";
 import { getSessionById } from "../../utils/utils";
-import { ChatTab } from "../../components/molecules/ChatTab/ChatTab";
+import { ExperimenterChatTab } from "../../components/molecules/ChatTab/ExperimenterChatTab";
 import {
+  selectChatGptTab,
   selectChatTab,
   selectInstructionsTab,
   selectParticipantsTab,
@@ -18,6 +19,7 @@ import StartVerificationModal from "../../modals/StartVerificationModal/StartVer
 import { useState, useEffect } from "react";
 import EndVerificationModal from "../../modals/EndVerificationModal/EndVerificationModal";
 import { FilterInformationTab } from "../../components/molecules/FilterInformationTab/FilterInformationTab";
+import { ChatGptTab } from "../../components/molecules/ChatGptTab/ChatGptTab";
 
 function WatchingRoom({
   connectedParticipants,
@@ -28,7 +30,8 @@ function WatchingRoom({
   onMuteParticipant,
   onStartExperiment,
   onEndExperiment,
-  onGetFiltersData
+  onGetFiltersData,
+  onUpdateMessageReadTime
 }) {
   const [startVerificationModal, setStartVerificationModal] = useState(false);
   const [endVerificationModal, setEndVerificationModal] = useState(false);
@@ -39,6 +42,7 @@ function WatchingRoom({
   const isInstructionsModalActive = useAppSelector(selectInstructionsTab);
   const isParticipantsModalActive = useAppSelector(selectParticipantsTab);
   const isFilterInformationModalActive = useAppSelector(selectFilterInformationTab);
+  const isChatGptModalActive = useAppSelector(selectChatGptTab);
 
   return (
     <div className="h-[calc(100vh-84px)] w-full">
@@ -104,11 +108,12 @@ function WatchingRoom({
           </div>
           <div className="w-1/4">
             {isChatModalActive && (
-              <ChatTab
+              <ExperimenterChatTab
                 onChat={onChat}
                 onLeaveExperiment={onLeaveExperiment}
                 onGetSession={onGetSession}
                 currentUser={"experimenter"}
+                onUpdateMessageReadTime={onUpdateMessageReadTime}
               />
             )}
             {isParticipantsModalActive && (
@@ -125,6 +130,7 @@ function WatchingRoom({
                 participants={sessionData["participants"]}
               />
             )}
+            {isChatGptModalActive && <ChatGptTab />}
           </div>
         </div>
       ) : (

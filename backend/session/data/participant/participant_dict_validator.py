@@ -34,6 +34,7 @@ def is_valid_participant(data, recursive: bool = True) -> TypeGuard[ParticipantD
     if (
         not isinstance(data["audio_filters"], list)
         or not isinstance(data["video_filters"], list)
+        or not isinstance(data["chat_filters"], list)
         or not isinstance(data["audio_group_filters"], list)
         or not isinstance(data["video_group_filters"], list)
         or not isinstance(data["chat"], list)
@@ -65,6 +66,9 @@ def is_valid_participant(data, recursive: bool = True) -> TypeGuard[ParticipantD
         isinstance(data["id"], str)
         and isinstance(data["participant_name"], str)
         and isinstance(data["muted_video"], bool)
+        and isinstance(data["lastMessageSentTime"], int)
+        and isinstance(data["lastMessageReadTime"], int)
+        and isinstance(data["chat_filters"], list)
         and isinstance(data["muted_audio"], bool)
         and isinstance(data["banned"], bool)
     )

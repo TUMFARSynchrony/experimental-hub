@@ -21,5 +21,6 @@ export enum Tabs {
   CHAT = "chat",
   INSTRUCTIONS = "instructions",
   PARTICIPANTS = "participants",
-  FILTER_INFORMATION = "filter_information"
+  FILTER_INFORMATION = "filter_information",
+  CHATGPT = "chatgpt"
 }

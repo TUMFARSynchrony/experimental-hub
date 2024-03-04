@@ -6,6 +6,7 @@ const initialState = {
   chatTabActive: true,
   instructionsTabActive: false,
   participantsTabActive: false,
+  chatGptTabActive: false,
   filterInformationTabActive: false
 };
 
@@ -18,6 +19,7 @@ export const tabsSlice = createSlice({
       state.instructionsTabActive = false;
       state.participantsTabActive = false;
       state.filterInformationTabActive = false;
+      state.chatTabActive = false;
     },
     toggleSingleTab: (state, { payload }) => {
       const tab: Tabs = payload;
@@ -27,24 +29,35 @@ export const tabsSlice = createSlice({
           state.instructionsTabActive = false;
           state.participantsTabActive = false;
           state.filterInformationTabActive = false;
+          state.chatGptTabActive = false;
           break;
         case Tabs.INSTRUCTIONS:
           state.chatTabActive = false;
           state.instructionsTabActive = !state.instructionsTabActive;
           state.participantsTabActive = false;
           state.filterInformationTabActive = false;
+          state.chatGptTabActive = false;
           break;
         case Tabs.PARTICIPANTS:
           state.chatTabActive = false;
           state.instructionsTabActive = false;
           state.participantsTabActive = !state.participantsTabActive;
           state.filterInformationTabActive = false;
+          state.chatGptTabActive = false;
           break;
         case Tabs.FILTER_INFORMATION:
           state.chatTabActive = false;
           state.instructionsTabActive = false;
           state.participantsTabActive = false;
           state.filterInformationTabActive = !state.filterInformationTabActive;
+          state.chatGptTabActive = false;
+          break;
+        case Tabs.CHATGPT:
+          state.chatTabActive = false;
+          state.instructionsTabActive = false;
+          state.participantsTabActive = false;
+          state.chatGptTabActive = !state.chatGptTabActive;
+          state.filterInformationTabActive = false;
           break;
       }
     }
@@ -62,3 +75,5 @@ export const selectParticipantsTab = (state: RootState) => state.tabs.participan
 
 export const selectFilterInformationTab = (state: RootState) =>
   state.tabs.filterInformationTabActive;
+
+export const selectChatGptTab = (state: RootState) => state.tabs.chatGptTabActive;

@@ -33,6 +33,9 @@ def participant_data_factory(participant_dict: ParticipantDict) -> ParticipantDa
         participant_dict["chat"],
         participant_dict["audio_filters"],
         participant_dict["video_filters"],
+        participant_dict["chat_filters"],
         participant_dict["audio_group_filters"],
         participant_dict["video_group_filters"],
+        participant_dict["lastMessageSentTime"],
+        participant_dict["lastMessageReadTime"],
     )

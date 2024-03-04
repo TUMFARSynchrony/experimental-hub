@@ -35,6 +35,9 @@ export type Participant = {
   video_filters: Filter[];
   audio_group_filters: Filter[];
   video_group_filters: Filter[];
+  chat_filters: ChatFilter[];
+  lastMessageSentTime: number;
+  lastMessageReadTime: number;
 };
 
 export type Box = {
@@ -63,6 +66,17 @@ export type ChatMessage = {
   time: number;
   author: string;
   target: string;
+  sentiment_score?: SentimentScore;
+};
+
+export type ChatGptMessage = {
+  content: string;
+  role: "user" | "assistant" | "system";
+};
+
+export type SentimentScore = {
+  label: string;
+  score: number;
 };
 
 export type Filter = {
@@ -71,6 +85,12 @@ export type Filter = {
   channel: string;
   groupFilter: boolean;
   config: FilterConfig;
+};
+
+export type ChatFilter = {
+  id: string;
+  name: string;
+  config: any;
 };
 
 export type FilterConfig = {

@@ -6,10 +6,15 @@ import VideoCanvas from "../../components/organisms/VideoCanvas/VideoCanvas";
 import ConnectionState from "../../networking/ConnectionState";
 import { useAppSelector } from "../../redux/hooks";
 import { selectCurrentSession } from "../../redux/slices/sessionsListSlice";
-import { ChatTab } from "../../components/molecules/ChatTab/ChatTab";
-import { selectChatTab, selectInstructionsTab } from "../../redux/slices/tabsSlice";
+import {
+  selectChatGptTab,
+  selectChatTab,
+  selectInstructionsTab
+} from "../../redux/slices/tabsSlice";
 import { InstructionsTab } from "../../components/molecules/InstructionsTab/InstructionsTab";
 import "./Lobby.css";
+import { ParticipantChatTab } from "../../components/molecules/ChatTab/ParticipantChatTab";
+import { ChatGptTab } from "../../components/molecules/ChatGptTab/ChatGptTab";
 
 function Lobby({ localStream, connection, onGetSession, onChat }) {
   const videoElement = useRef(null);
@@ -20,6 +25,7 @@ function Lobby({ localStream, connection, onGetSession, onChat }) {
   const [participantStream, setParticipantStream] = useState(null);
   const isChatModalActive = useAppSelector(selectChatTab);
   const isInstructionsModalActive = useAppSelector(selectInstructionsTab);
+  const isChatGptModalActive = useAppSelector(selectChatGptTab);
   const [searchParams, setSearchParams] = useSearchParams();
   const sessionIdParam = searchParams.get("sessionId");
   const participantIdParam = searchParams.get("participantId");
@@ -53,6 +59,7 @@ function Lobby({ localStream, connection, onGetSession, onChat }) {
   useEffect(() => {
     if (participantStream && userConsent && videoElement.current) {
       videoElement.current.srcObject = localStream;
+      videoElement.current.muted = true;
     }
   }, [localStream, participantStream, userConsent]);
 
@@ -80,7 +87,14 @@ function Lobby({ localStream, connection, onGetSession, onChat }) {
                   ownParticipantId={participantIdParam}
                 />
               ) : (
-                <video ref={videoElement} autoPlay playsInline width="100%" height="100%"></video>
+                <video
+                  ref={videoElement}
+                  autoPlay
+                  playsInline
+                  width="100%"
+                  height="100%"
+                  muted={true}
+                ></video>
               )
             ) : (
               <Typography>
@@ -95,7 +109,7 @@ function Lobby({ localStream, connection, onGetSession, onChat }) {
         <div className="w-1/4">
           {connectionState !== ConnectionState.CONNECTED && <div>Trying to connect...</div>}
           {connectionState === ConnectionState.CONNECTED && isChatModalActive && (
-            <ChatTab
+            <ParticipantChatTab
               onChat={onChat}
               onGetSession={onGetSession}
               currentUser="participant"
@@ -106,6 +120,8 @@ function Lobby({ localStream, connection, onGetSession, onChat }) {
           {connectionState === ConnectionState.CONNECTED && isInstructionsModalActive && (
             <InstructionsTab />
           )}
+
+          {connectionState === ConnectionState.CONNECTED && isChatGptModalActive && <ChatGptTab />}
         </div>
       </div>
     </>

@@ -198,11 +198,9 @@ function App() {
   };
 
   const handleChatMessages = (data) => {
-    // this is logged on participant's view
     dispatch(
       addMessageToCurrentSession({
         message: data,
-        sessionId: data.session,
         author: data.author,
         target: data.target
       })
@@ -214,6 +212,11 @@ function App() {
         severity: "info",
         autoHideDuration: 10000,
         anchorOrigin: { vertical: "top", horizontal: "center" }
+      });
+    }
+    if (data.target === "experimenter") {
+      connection.sendMessage("GET_SESSION", {
+        session_id: ongoingExperimentRef.current.sessionId
       });
     }
   };
@@ -400,6 +403,13 @@ function App() {
     connection.sendMessage("STOP_EXPERIMENT", {});
   };
 
+  const onUpdateMessageReadTime = (participantId, lastMessageReadTime) => {
+    connection.sendMessage("UPDATE_READ_MESSAGE_TIME", {
+      participant_id: participantId,
+      lastMessageReadTime: lastMessageReadTime
+    });
+  };
+
   const toggleModal = (modal) => {
     dispatch(toggleSingleTab(modal));
   };
@@ -475,6 +485,10 @@ function App() {
                         {
                           onClick: () => toggleModal(Tabs.INSTRUCTIONS),
                           icon: faClipboardCheck
+                        },
+                        {
+                          onClick: () => toggleModal(Tabs.CHATGPT),
+                          externalIcon: true
                         }
                       ]}
                     />
@@ -518,6 +532,10 @@ function App() {
                       {
                         onClick: () => toggleModal(Tabs.FILTER_INFORMATION),
                         icon: faClipboardList
+                      },
+                      {
+                        onClick: () => toggleModal(Tabs.CHATGPT),
+                        externalIcon: true
                       }
                     ]}
                   />
@@ -563,6 +581,10 @@ function App() {
                       {
                         onClick: () => toggleModal(Tabs.FILTER_INFORMATION),
                         icon: faClipboardList
+                      },
+                      {
+                        onClick: () => toggleModal(Tabs.CHATGPT),
+                        externalIcon: true
                       }
                     ]}
                   />
@@ -579,6 +601,7 @@ function App() {
                     onStartExperiment={onStartExperiment}
                     onEndExperiment={onEndExperiment}
                     onGetFiltersData={onGetFiltersData}
+                    onUpdateMessageReadTime={onUpdateMessageReadTime}
                   />
                 }
                 centerContentOnYAxis={true}

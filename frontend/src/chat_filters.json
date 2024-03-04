@@ -1,0 +1,9 @@
+{
+  "chat_filters": [
+    {
+      "id": "sentiment-analysis",
+      "name": "SENTIMENT ANALYSIS",
+      "config": {}
+    }
+  ]
+}

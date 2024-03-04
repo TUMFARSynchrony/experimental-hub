@@ -174,52 +174,6 @@ function SessionForm({ onSendSessionToBackend, onGetFiltersConfig }) {
     onSendSessionToBackend(sessionData);
   };
 
-  const addRandomSessionData = () => {
-    const futureDate = new Date().setDate(new Date().getDate() + 7);
-
-    let newSessionData = {
-      id: "",
-      title: "Hello World",
-      description: "Randomly created session",
-      date: new Date(futureDate).getTime(),
-      time_limit: 3600000,
-      record: true,
-      participants: [
-        {
-          id: "",
-          participant_name: "Max Mustermann",
-          muted_audio: true,
-          muted_video: true,
-          banned: false,
-          audio_filters: [],
-          video_filters: [],
-          audio_group_filters: [],
-          video_group_filters: [],
-          chat: [],
-          position: {
-            x: 10,
-            y: 10,
-            z: 0
-          },
-          size: {
-            width: 250,
-            height: 250
-          }
-        }
-      ],
-      start_time: 0,
-      end_time: 0,
-      creation_time: 0,
-      notes: [],
-      log: ""
-    };
-
-    setTimeLimit(newSessionData.time_limit / 60000);
-    dispatch(initializeSession(newSessionData));
-    let dimensions = getParticipantDimensions(newSessionData.participants);
-    setParticipantDimensions(dimensions);
-  };
-
   return (
     <>
       <div className="flex h-[calc(100vh-84px)] flex-row px-4 py-8 items-start">
@@ -280,14 +234,13 @@ function SessionForm({ onSendSessionToBackend, onGetFiltersConfig }) {
                       disabled
                     />
                   </Box>
-                  <Box sx={{ mt: 1, mb: 3 }}>
+                  <Box sx={{ mt: 1, mb: 1 }}>
                     <FormControlLabel
                       control={<Checkbox />}
                       label="Record Session"
                       checked={sessionData.record}
                       onChange={() => handleSessionDataChange("record", !sessionData.record)}
                     />
-                    {/* <ActionIconButton text="Create participants" variant="contained" color="primary" size="small" onClick={() => handleCreateParticipants()} icon={<PeopleOutline />} /> */}
                   </Box>
                 </Box>
 

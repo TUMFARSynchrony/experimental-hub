@@ -265,13 +265,6 @@ class Participant(User):
                 description="Message data is not a valid ChatMessage.",
             )
 
-        if data["target"] != "experimenter":
-            raise ErrorDictException(
-                code=403,
-                type="INVALID_REQUEST",
-                description='Participants can only chat with "experimenter".',
-            )
-
         if data["author"] != self.id:
             raise ErrorDictException(
                 code=400,

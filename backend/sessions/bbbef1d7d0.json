@@ -26,10 +26,13 @@
                 "z": 0
             },
             "chat": [],
+            "chat_filters": [],
             "audio_filters": [],
             "video_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "lastMessageSentTime": 0,
+            "lastMessageReadTime": 0
         },
         {
             "id": "b",
@@ -49,8 +52,11 @@
             "chat": [],
             "audio_filters": [],
             "video_filters": [],
+            "chat_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "lastMessageSentTime": 0,
+            "lastMessageReadTime": 0
         },
         {
             "id": "c",
@@ -70,8 +76,11 @@
             "chat": [],
             "audio_filters": [],
             "video_filters": [],
+            "chat_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "lastMessageSentTime": 0,
+            "lastMessageReadTime": 0
         },
         {
             "id": "d",
@@ -91,8 +100,11 @@
             "chat": [],
             "audio_filters": [],
             "video_filters": [],
+            "chat_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "lastMessageSentTime": 0,
+            "lastMessageReadTime": 0
         },
         {
             "id": "e",
@@ -112,8 +124,11 @@
             "chat": [],
             "audio_filters": [],
             "video_filters": [],
+            "chat_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "lastMessageSentTime": 0,
+            "lastMessageReadTime": 0
         },
         {
             "id": "f",
@@ -133,8 +148,11 @@
             "chat": [],
             "audio_filters": [],
             "video_filters": [],
+            "chat_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "lastMessageSentTime": 0,
+            "lastMessageReadTime": 0
         },
         {
             "id": "g",
@@ -154,8 +172,11 @@
             "chat": [],
             "audio_filters": [],
             "video_filters": [],
+            "chat_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "lastMessageSentTime": 0,
+            "lastMessageReadTime": 0
         },
         {
             "id": "h",
@@ -175,8 +196,11 @@
             "chat": [],
             "audio_filters": [],
             "video_filters": [],
+            "chat_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "lastMessageSentTime": 0,
+            "lastMessageReadTime": 0
         },
         {
             "id": "i",
@@ -196,8 +220,11 @@
             "chat": [],
             "audio_filters": [],
             "video_filters": [],
+            "chat_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "lastMessageSentTime": 0,
+            "lastMessageReadTime": 0
         },
         {
             "id": "j",
@@ -217,8 +244,11 @@
             "chat": [],
             "audio_filters": [],
             "video_filters": [],
+            "chat_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "lastMessageSentTime": 0,
+            "lastMessageReadTime": 0
         }
     ],
     "log": []

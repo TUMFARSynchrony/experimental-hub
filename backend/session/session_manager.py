@@ -169,8 +169,8 @@ class SessionManager:
         session_dict["id"] = session_id
 
         session = session_data_factory(session_dict)
+        self._logger.info(f"session data factory: {str(session.asdict())}")
         session.add_listener("update", self._handle_session_update)
-        self._logger.info(f"New session created: {str(session)}")
         self._sessions[session_id] = session
         self._write(session.asdict())
         return session

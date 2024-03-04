@@ -88,6 +88,7 @@ class Experimenter(User):
             self._handle_get_filters_data_send_to_participant,
         )
         self.on_message("GET_SESSION", self._handle_get_session)
+        self.on_message("UPDATE_READ_MESSAGE_TIME", self._handle_message_read_time)
         self.on_message("GET_FILTERS_CONFIG", self._handle_get_filters_config)
 
     def __str__(self) -> str:
@@ -973,3 +974,10 @@ class Experimenter(User):
         return MessageDict(
             type="FILTERS_CONFIG", data=filter_utils.get_filters_config()
         )
+
+    async def _handle_message_read_time(self, data: Any) -> None:
+        experiment = self.get_experiment_or_raise("Failed to mute participant.")
+        await experiment.set_message_read_time(
+            data["participant_id"], data["lastMessageReadTime"]
+        )
+
