@@ -42,7 +42,36 @@
       "audio_filters": [],
       "video_filters": [],
       "audio_group_filters": [],
-      "video_group_filters": []
+      "video_group_filters": [],
+      "view": [
+        {
+          "id": "67890",
+          "participant_name": "Erika",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 200
+          },
+          "size": {
+            "width": 200,
+            "height": 200
+          }
+        },
+        {
+          "id": "12345",
+          "participant_name": "Max",
+          "position": {
+            "x": 0,
+            "y": 10,
+            "z": 10
+          },
+          "size": {
+            "width": 100,
+            "height": 100
+          }
+        }
+      ],
+      "canvas_id": "12345"
     },
     {
       "id": "25a882669d",
@@ -82,47 +111,23 @@
       "audio_filters": [],
       "video_filters": [],
       "audio_group_filters": [],
-      "video_group_filters": []
-    },
-    {
-      "id": "8e39086e83",
-      "participant_name": "Bob",
-      "banned": false,
-      "size": {
-        "width": 100,
-        "height": 100
-      },
-      "muted_video": true,
-      "muted_audio": true,
-      "position": {
-        "x": 0,
-        "y": 300,
-        "z": 250
-      },
-      "chat": [
+      "video_group_filters": [],
+      "view": [
         {
-          "message": "Welcome to todays experiment!",
-          "time": 1650380763075,
-          "author": "experimenter",
-          "target": "participants"
-        },
-        {
-          "message": "Hello World!",
-          "time": 1650380765075,
-          "author": "8e39086e83",
-          "target": "experimenter"
-        },
-        {
-          "message": "Lets build the experimental hub!",
-          "time": 1650380765075,
-          "author": "8e39086e83",
-          "target": "experimenter"
+          "id": "12345",
+          "participant_name": "Max",
+          "position": {
+            "x": 0,
+            "y": 10,
+            "z": 10
+          },
+          "size": {
+            "width": 100,
+            "height": 100
+          }
         }
       ],
-      "audio_filters": [],
-      "video_filters": [],
-      "audio_group_filters": [],
-      "video_group_filters": []
+      "canvas_id": "67890"
     }
   ],
   "log": []

@@ -8,6 +8,7 @@ from typing import TypedDict
 from session.data.size import SizeDict
 from session.data.position import PositionDict
 from custom_types.chat_message import ChatMessageDict
+from custom_types.canvas_element import CanvasElementDict
 
 
 class ParticipantSummaryDict(TypedDict):
@@ -29,6 +30,10 @@ class ParticipantSummaryDict(TypedDict):
         Size of the participant's stream on the canvas.
     chat : list of custom_types.chat_log.ChatLogDict
         Chat log between experimenter and participant.
+    view : list of custom_types.canvas_element.CanvasElementDict
+        Asymmetric view of the participant
+    canvas_id : str
+        Unique id for the placement of the participant stream
 
     See Also
     --------
@@ -42,3 +47,5 @@ class ParticipantSummaryDict(TypedDict):
     position: PositionDict
     size: SizeDict
     chat: list[ChatMessageDict]
+    view: list[CanvasElementDict]
+    canvas_id: str

@@ -45,7 +45,9 @@ export const INITIAL_PARTICIPANT_DATA: Participant = {
   size: {
     width: 250,
     height: 250
-  }
+  },
+  view: [],
+  canvas_id: ""
 };
 
 export const INITIAL_NOTE_DATA: Note = {

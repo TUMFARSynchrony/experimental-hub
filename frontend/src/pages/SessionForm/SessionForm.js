@@ -32,6 +32,7 @@ import {
   selectOpenSession
 } from "../../redux/slices/openSessionSlice";
 import { initialSnackbar } from "../../utils/constants";
+import { v4 as uuid } from "uuid";
 
 function SessionForm({ onSendSessionToBackend, onGetFiltersConfig }) {
   const dispatch = useAppDispatch();
@@ -116,9 +117,11 @@ function SessionForm({ onSendSessionToBackend, onGetFiltersConfig }) {
   };
 
   const onAddParticipant = () => {
+    const canvasId = uuid();
     dispatch(
       addParticipant({
         ...INITIAL_PARTICIPANT_DATA,
+        canvas_id: canvasId,
         position: { x: xAxis, y: yAxis, z: 0 }
       })
     );
@@ -126,18 +129,19 @@ function SessionForm({ onSendSessionToBackend, onGetFiltersConfig }) {
       ...participantDimensions,
       {
         shapes: {
-          x: xAxis,
-          y: yAxis,
-          fill: getRandomColor(),
-          z: 0
-        },
-        groups: {
           x: 0,
           y: 0,
           z: 0,
+          fill: getRandomColor()
+        },
+        groups: {
+          x: xAxis,
+          y: yAxis,
+          z: 0,
           width: 250,
           height: 250
-        }
+        },
+        id: canvasId
       }
     ];
     setParticipantDimensions(newParticipantDimensions);
@@ -204,7 +208,8 @@ function SessionForm({ onSendSessionToBackend, onGetFiltersConfig }) {
           size: {
             width: 250,
             height: 250
-          }
+          },
+          view: []
         }
       ],
       start_time: 0,
@@ -316,6 +321,7 @@ function SessionForm({ onSendSessionToBackend, onGetFiltersConfig }) {
                         handleParticipantChange={handleParticipantChange}
                         setSnackbarResponse={setSnackbarResponse}
                         handleCanvasPlacement={handleCanvasPlacement}
+                        participantDimensions={participantDimensions}
                       />
                     );
                   })}
@@ -345,10 +351,11 @@ function SessionForm({ onSendSessionToBackend, onGetFiltersConfig }) {
             icon={showSessionDataForm ? <ChevronLeft /> : <ChevronRight />}
           />
         </div>
-        <div>
+        <div className="pr-8">
           <DragAndDrop
             participantDimensions={participantDimensions}
             setParticipantDimensions={setParticipantDimensions}
+            asymmetricView={false}
           />
         </div>
       </div>

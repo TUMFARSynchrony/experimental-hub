@@ -13,18 +13,50 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ActionButton } from "../../components/atoms/Button";
 import CustomSnackbar from "../../components/atoms/CustomSnackbar/CustomSnackbar";
 import { initialSnackbar } from "../../utils/constants";
 import { getParticipantInviteLink } from "../../utils/utils";
 import { useAppSelector } from "../../redux/hooks";
 import {
+  Filter,
+  FilterConfigArray,
+  FilterConfigNumber,
+  Participant,
+  Shape,
+  Group
+} from "../../types";
+import {
   selectFiltersDataSession,
   selectNumberOfParticipants
 } from "../../redux/slices/openSessionSlice";
-import { Filter, FilterConfigArray, FilterConfigNumber, Participant } from "../../types";
 import { v4 as uuid } from "uuid";
+import filtersData from "../../filters_data.json";
+import DragAndDrop from "../../components/organisms/DragAndDrop/DragAndDrop";
+import { getAsymmetricParticipantDimensions, getAsymmetricViewArray } from "../../utils/utils";
+
+// Loading filters data before the component renders, because the Select component needs value.
+const testData: Filter[] = filtersData.SESSION.map((filter: Filter) => {
+  return filter;
+});
+
+// We set the 'selectedFilter' to a default filter type, because the MUI Select component requires a default value when the page loads.
+const defaultFilter = {
+  id: "",
+  name: "Placeholder",
+  channel: "",
+  groupFilter: false,
+  config: {}
+};
+
+const getIndividualFilters = () => {
+  return testData.filter((filter) => filter.groupFilter !== true);
+};
+
+const getGroupFilters = () => {
+  return testData.filter((filter) => filter.groupFilter === true);
+};
 
 type Props = {
   originalParticipant: Participant;
@@ -43,6 +75,10 @@ type Props = {
       newInputEqualsOld: boolean;
     }>
   >;
+  participantDimensions: {
+    shapes: Shape;
+    groups: Group;
+  }[];
 };
 
 function ParticipantDataModal({
@@ -54,7 +90,8 @@ function ParticipantDataModal({
   handleParticipantChange,
   onDeleteParticipant,
   setSnackbarResponse,
-  handleCanvasPlacement
+  handleCanvasPlacement,
+  participantDimensions
 }: Props) {
   // We set the 'selectedFilter' to a default filter type, because the MUI Select component requires a default value when the page loads.
   const defaultFilter = {
@@ -72,6 +109,11 @@ function ParticipantDataModal({
   const groupFilters = filtersData.filter((filter) => filter.groupFilter === true);
   const [snackbar, setSnackbar] = useState(initialSnackbar);
   const [requiredFilters, setRequiredFilters] = useState(new Map<string, string>());
+  const originalDimensions = structuredClone(participantDimensions);
+  const originalAsymmetricView = structuredClone(originalParticipant.view);
+  const [asymmetricView, setAsymmetricView] = useState(
+    originalParticipant.view ? getAsymmetricParticipantDimensions(originalParticipant.view) : []
+  );
   const numberOfParticipants = useAppSelector(selectNumberOfParticipants);
 
   // Setting these snackbar response values to display the notification in Session Form Page.
@@ -91,6 +133,14 @@ function ParticipantDataModal({
     setParticipantCopy(newParticipantData);
   };
 
+  useEffect(() => {
+    setAsymmetricView(getAsymmetricParticipantDimensions(originalParticipant.view));
+  }, [originalParticipant.view]);
+
+  useEffect(() => {
+    handleChange("view", getAsymmetricViewArray(asymmetricView));
+  }, [asymmetricView]);
+
   const handleFilterChange = <T extends keyof Participant>(
     index: number,
     key: string,
@@ -106,6 +156,7 @@ function ParticipantDataModal({
   // if required data is missing) to display appropriate notification.
   const onCloseModalWithoutData = () => {
     setShowParticipantInput(!showParticipantInput);
+    setAsymmetricView(getAsymmetricParticipantDimensions(originalAsymmetricView));
 
     const newParticipantInputEmpty = participantCopy.participant_name === "";
     if (newParticipantInputEmpty) {
@@ -317,86 +368,92 @@ function ParticipantDataModal({
         severity={snackbar.severity}
         handleClose={() => setSnackbar(initialSnackbar)}
       />
-      <Dialog open={showParticipantInput} onClose={() => onCloseModalWithoutData()}>
+      <Dialog open={showParticipantInput} onClose={() => onCloseModalWithoutData()} maxWidth={"xl"}>
         <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
           Participant Details
         </DialogTitle>
         <DialogContent>
-          <Box>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 5,
-                my: 3
-              }}
-            >
-              <TextField
-                label="Participant Name"
-                value={participantCopy.participant_name}
-                size="small"
-                fullWidth
-                required
-                onChange={(event) => {
-                  handleChange("participant_name", event.target.value);
-                }}
-              />
-            </Box>
+          <div className="flex">
             <Box>
-              <TextField
-                label="Invite Link"
-                size="small"
-                fullWidth
-                disabled
-                value={
-                  !(participantCopy.id.length === 0 || sessionId.length === 0)
-                    ? getParticipantInviteLink(participantCopy.id, sessionId)
-                    : "Save session to generate link."
-                }
-              />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 4,
-                my: 3
-              }}
-            >
-              <TextField label="Width" size="small" value={participantCopy.size.width} disabled />
-              <TextField label="Height" size="small" value={participantCopy.size.height} disabled />
-              <TextField
-                label="x coordinate"
-                size="small"
-                value={participantCopy.position.x}
-                disabled
-              />
-              <TextField
-                label="y coordinate"
-                size="small"
-                value={participantCopy.position.y}
-                disabled
-              />
-            </Box>
-            <Box sx={{ display: "flex", justifyContent: "center", gap: 2, my: 3 }}>
-              <FormControlLabel
-                control={<Checkbox />}
-                label="Mute Audio"
-                checked={participantCopy.muted_audio}
-                onChange={() => {
-                  handleChange("muted_audio", !participantCopy.muted_audio);
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 5,
+                  my: 3
                 }}
-              />
-              <FormControlLabel
-                control={<Checkbox />}
-                label="Mute Video"
-                checked={participantCopy.muted_video}
-                onChange={() => {
-                  handleChange("muted_video", !participantCopy.muted_video);
+              >
+                <TextField
+                  label="Participant Name"
+                  value={participantCopy.participant_name}
+                  size="small"
+                  fullWidth
+                  required
+                  onChange={(event) => {
+                    handleChange("participant_name", event.target.value);
+                  }}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  label="Invite Link"
+                  size="small"
+                  fullWidth
+                  disabled
+                  value={
+                    !(participantCopy.id.length === 0 || sessionId.length === 0)
+                      ? getParticipantInviteLink(participantCopy.id, sessionId)
+                      : "Save session to generate link."
+                  }
+                />
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 4,
+                  my: 3
                 }}
-              />
+              >
+                <TextField label="Width" size="small" value={participantCopy.size.width} disabled />
+                <TextField
+                  label="Height"
+                  size="small"
+                  value={participantCopy.size.height}
+                  disabled
+                />
+                <TextField
+                  label="x coordinate"
+                  size="small"
+                  value={participantCopy.position.x}
+                  disabled
+                />
+                <TextField
+                  label="y coordinate"
+                  size="small"
+                  value={participantCopy.position.y}
+                  disabled
+                />
+              </Box>
+              <Box sx={{ display: "flex", justifyContent: "center", gap: 2, my: 3 }}>
+                <FormControlLabel
+                  control={<Checkbox />}
+                  label="Mute Audio"
+                  checked={participantCopy.muted_audio}
+                  onChange={() => {
+                    handleChange("muted_audio", !participantCopy.muted_audio);
+                  }}
+                />
+                <FormControlLabel
+                  control={<Checkbox />}
+                  label="Mute Video"
+                  checked={participantCopy.muted_video}
+                  onChange={() => {
+                    handleChange("muted_video", !participantCopy.muted_video);
+                  }}
+                />
+              </Box>
             </Box>
-
             {/* Displays the list of filters available in the backend in a dropdown */}
             <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
               <FormControl sx={{ m: 1, minWidth: 180 }} size="small">
@@ -481,227 +538,251 @@ function ParticipantDataModal({
                           }}
                         />
                       </Box>
+                    </Box>
+                  );
+                }
+              )}
 
-                      {/* If the config attribute is an array, renders a dropdown. If it is a number, renders an input for number */}
+              {/* Displays applied audio filters */}
+              <Box>
+                <Typography variant="overline" display="block">
+                  Audio Filters
+                </Typography>
+                {participantCopy.audio_filters.map(
+                  (audioFilter: Filter, audioFilterIndex: number) => {
+                    return (
                       <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "flex-start",
-                          flexWrap: "wrap"
-                        }}
+                        key={audioFilterIndex}
+                        sx={{ display: "flex", justifyContent: "flex-start" }}
                       >
-                        {Object.keys(audioFilter.config).map((configType, configIndex) => {
-                          if (Array.isArray(audioFilter["config"][configType]["defaultValue"])) {
-                            return (
-                              <FormControl
-                                key={configIndex}
-                                sx={{ m: 1, width: "10vw", minWidth: 130 }}
-                                size="small"
-                              >
-                                <InputLabel htmlFor="grouped-select">
-                                  {configType.charAt(0).toUpperCase() + configType.slice(1)}
-                                </InputLabel>
-                                <Select
+                        <Box sx={{ minWidth: 140 }}>
+                          <Chip
+                            key={audioFilterIndex}
+                            label={audioFilter.name}
+                            variant="outlined"
+                            size="medium"
+                            color="secondary"
+                            onDelete={() => {
+                              handleDeleteAudioFilter(audioFilter, audioFilterIndex);
+                            }}
+                          />
+                        </Box>
+
+                        {/* If the config attribute is an array, renders a dropdown. If it is a number, renders an input for number */}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "flex-start",
+                            flexWrap: "wrap"
+                          }}
+                        >
+                          {Object.keys(audioFilter.config).map((configType, configIndex) => {
+                            if (Array.isArray(audioFilter["config"][configType]["defaultValue"])) {
+                              return (
+                                <FormControl
                                   key={configIndex}
-                                  value={
-                                    (audioFilter["config"][configType] as FilterConfigArray)[
-                                      "requiresOtherFilter"
-                                    ]
-                                      ? (
-                                          audioFilter["config"][configType][
-                                            "defaultValue"
-                                          ] as string[]
-                                        )[0]
-                                      : audioFilter["config"][configType]["value"]
-                                  }
-                                  id="grouped-select"
+                                  sx={{ m: 1, width: "10vw", minWidth: 130 }}
+                                  size="small"
+                                >
+                                  <InputLabel htmlFor="grouped-select">
+                                    {configType.charAt(0).toUpperCase() + configType.slice(1)}
+                                  </InputLabel>
+                                  <Select
+                                    key={configIndex}
+                                    value={
+                                      (audioFilter["config"][configType] as FilterConfigArray)[
+                                        "requiresOtherFilter"
+                                      ]
+                                        ? (
+                                            audioFilter["config"][configType][
+                                              "defaultValue"
+                                            ] as string[]
+                                          )[0]
+                                        : audioFilter["config"][configType]["value"]
+                                    }
+                                    id="grouped-select"
+                                    onChange={(e) => {
+                                      handleFilterChange(
+                                        audioFilterIndex,
+                                        configType,
+                                        e.target.value,
+                                        "audio_filters"
+                                      );
+                                    }}
+                                  >
+                                    {(
+                                      audioFilter["config"][configType]["defaultValue"] as string[]
+                                    ).map((value: string) => {
+                                      return (
+                                        <MenuItem key={value} value={value}>
+                                          {value}
+                                        </MenuItem>
+                                      );
+                                    })}
+                                  </Select>
+                                </FormControl>
+                              );
+                            } else if (
+                              typeof audioFilter["config"][configType]["defaultValue"] == "number"
+                            ) {
+                              return (
+                                <TextField
+                                  key={configIndex}
+                                  label={configType.charAt(0).toUpperCase() + configType.slice(1)}
+                                  defaultValue={audioFilter["config"][configType]["value"]}
+                                  InputProps={{
+                                    inputProps: {
+                                      min: (
+                                        audioFilter["config"][configType] as FilterConfigNumber
+                                      )["min"],
+                                      max: (
+                                        audioFilter["config"][configType] as FilterConfigNumber
+                                      )["max"],
+                                      step: (
+                                        audioFilter["config"][configType] as FilterConfigNumber
+                                      )["step"]
+                                    }
+                                  }}
+                                  type="number"
+                                  size="small"
+                                  sx={{ m: 1, width: "10vw", minWidth: 130 }}
                                   onChange={(e) => {
                                     handleFilterChange(
                                       audioFilterIndex,
                                       configType,
-                                      e.target.value,
+                                      parseInt(e.target.value),
                                       "audio_filters"
                                     );
                                   }}
-                                >
-                                  {(
-                                    audioFilter["config"][configType]["defaultValue"] as string[]
-                                  ).map((value: string) => {
-                                    return (
-                                      <MenuItem key={value} value={value}>
-                                        {value}
-                                      </MenuItem>
-                                    );
-                                  })}
-                                </Select>
-                              </FormControl>
-                            );
-                          } else if (
-                            typeof audioFilter["config"][configType]["defaultValue"] == "number"
-                          ) {
-                            return (
-                              <TextField
-                                key={configIndex}
-                                label={configType.charAt(0).toUpperCase() + configType.slice(1)}
-                                defaultValue={audioFilter["config"][configType]["value"]}
-                                InputProps={{
-                                  inputProps: {
-                                    min: (audioFilter["config"][configType] as FilterConfigNumber)[
-                                      "min"
-                                    ],
-                                    max: (audioFilter["config"][configType] as FilterConfigNumber)[
-                                      "max"
-                                    ],
-                                    step: (audioFilter["config"][configType] as FilterConfigNumber)[
-                                      "step"
-                                    ]
-                                  }
-                                }}
-                                type="number"
-                                size="small"
-                                sx={{ m: 1, width: "10vw", minWidth: 130 }}
-                                onChange={(e) => {
-                                  handleFilterChange(
-                                    audioFilterIndex,
-                                    configType,
-                                    parseInt(e.target.value),
-                                    "audio_filters"
-                                  );
-                                }}
-                              />
-                            );
-                          }
-                        })}
+                                />
+                              );
+                            }
+                          })}
+                        </Box>
                       </Box>
-                    </Box>
-                  );
-                }
-              )}
-
-              {/* Displays applied video filters */}
-              <Typography variant="overline" display="block">
-                Video Filters
-              </Typography>
-              {participantCopy.video_filters.map(
-                (videoFilter: Filter, videoFilterIndex: number) => {
-                  return (
-                    <Box
-                      key={videoFilterIndex}
-                      sx={{ display: "flex", justifyContent: "flex-start" }}
-                    >
-                      <Box sx={{ minWidth: 140 }}>
-                        <Chip
-                          key={videoFilterIndex}
-                          label={videoFilter.name}
-                          variant="outlined"
-                          size="medium"
-                          color="secondary"
-                          onDelete={() => {
-                            handleDeleteVideoFilter(
-                              videoFilter,
-                              videoFilterIndex,
-                              videoFilter.groupFilter
-                            );
-                          }}
-                        />
-                      </Box>
-
-                      {/* If the config attribute is an array, renders a dropdown. Incase of a number, renders an input for number */}
+                    );
+                  }
+                )}
+                {/* Displays applied video filters */}
+                <Typography variant="overline" display="block">
+                  Video Filters
+                </Typography>
+                {participantCopy.video_filters.map(
+                  (videoFilter: Filter, videoFilterIndex: number) => {
+                    return (
                       <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "flex-start",
-                          flexWrap: "wrap"
-                        }}
+                        key={videoFilterIndex}
+                        sx={{ display: "flex", justifyContent: "flex-start" }}
                       >
-                        {Object.keys(videoFilter.config).map((configType, configIndex) => {
-                          if (Array.isArray(videoFilter["config"][configType]["defaultValue"])) {
-                            return (
-                              <FormControl
-                                key={configIndex}
-                                sx={{ m: 1, width: "10vw", minWidth: 130 }}
-                                size="small"
-                              >
-                                <InputLabel htmlFor="grouped-select">
-                                  {configType.charAt(0).toUpperCase() + configType.slice(1)}
-                                </InputLabel>
-                                <Select
+                        <Box sx={{ minWidth: 140 }}>
+                          <Chip
+                            key={videoFilterIndex}
+                            label={videoFilter.name}
+                            variant="outlined"
+                            size="medium"
+                            color="secondary"
+                            onDelete={() => {
+                              handleDeleteVideoFilter(videoFilter, videoFilterIndex);
+                            }}
+                          />
+                        </Box>
+
+                        {/* If the config attribute is an array, renders a dropdown. Incase of a number, renders an input for number */}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "flex-start",
+                            flexWrap: "wrap"
+                          }}
+                        >
+                          {Object.keys(videoFilter.config).map((configType, configIndex) => {
+                            if (Array.isArray(videoFilter["config"][configType]["defaultValue"])) {
+                              return (
+                                <FormControl
                                   key={configIndex}
-                                  value={
-                                    (videoFilter["config"][configType] as FilterConfigArray)[
-                                      "requiresOtherFilter"
-                                    ]
-                                      ? (
-                                          videoFilter["config"][configType][
-                                            "defaultValue"
-                                          ] as string[]
-                                        )[0]
-                                      : videoFilter["config"][configType]["value"]
-                                  }
-                                  id="grouped-select"
+                                  sx={{ m: 1, width: "10vw", minWidth: 130 }}
+                                  size="small"
+                                >
+                                  <InputLabel htmlFor="grouped-select">
+                                    {configType.charAt(0).toUpperCase() + configType.slice(1)}
+                                  </InputLabel>
+                                  <Select
+                                    key={configIndex}
+                                    value={
+                                      (videoFilter["config"][configType] as FilterConfigArray)[
+                                        "requiresOtherFilter"
+                                      ]
+                                        ? (
+                                            videoFilter["config"][configType][
+                                              "defaultValue"
+                                            ] as string[]
+                                          )[0]
+                                        : videoFilter["config"][configType]["value"]
+                                    }
+                                    id="grouped-select"
+                                    onChange={(e) => {
+                                      handleFilterChange(
+                                        videoFilterIndex,
+                                        configType,
+                                        e.target.value,
+                                        "video_filters"
+                                      );
+                                    }}
+                                  >
+                                    {(
+                                      videoFilter["config"][configType]["defaultValue"] as string[]
+                                    ).map((value: string) => {
+                                      return (
+                                        <MenuItem key={value} value={value}>
+                                          {value}
+                                        </MenuItem>
+                                      );
+                                    })}
+                                  </Select>
+                                </FormControl>
+                              );
+                            } else if (
+                              typeof videoFilter["config"][configType]["defaultValue"] == "number"
+                            ) {
+                              return (
+                                <TextField
+                                  key={configIndex}
+                                  label={configType.charAt(0).toUpperCase() + configType.slice(1)}
+                                  defaultValue={videoFilter["config"][configType]["value"]}
+                                  InputProps={{
+                                    inputProps: {
+                                      min: (
+                                        videoFilter["config"][configType] as FilterConfigNumber
+                                      )["min"],
+                                      max: (
+                                        videoFilter["config"][configType] as FilterConfigNumber
+                                      )["max"],
+                                      step: (
+                                        videoFilter["config"][configType] as FilterConfigNumber
+                                      )["step"]
+                                    }
+                                  }}
+                                  type="number"
+                                  size="small"
+                                  sx={{ m: 1, width: "10vw", minWidth: 130 }}
                                   onChange={(e) => {
                                     handleFilterChange(
                                       videoFilterIndex,
                                       configType,
-                                      e.target.value,
+                                      parseInt(e.target.value),
                                       "video_filters"
                                     );
                                   }}
-                                >
-                                  {(
-                                    videoFilter["config"][configType]["defaultValue"] as string[]
-                                  ).map((value: string) => {
-                                    return (
-                                      <MenuItem key={value} value={value}>
-                                        {value}
-                                      </MenuItem>
-                                    );
-                                  })}
-                                </Select>
-                              </FormControl>
-                            );
-                          } else if (
-                            typeof videoFilter["config"][configType]["defaultValue"] == "number"
-                          ) {
-                            return (
-                              <TextField
-                                key={configIndex}
-                                label={configType.charAt(0).toUpperCase() + configType.slice(1)}
-                                defaultValue={videoFilter["config"][configType]["value"]}
-                                InputProps={{
-                                  inputProps: {
-                                    min: (videoFilter["config"][configType] as FilterConfigNumber)[
-                                      "min"
-                                    ],
-                                    max: (videoFilter["config"][configType] as FilterConfigNumber)[
-                                      "max"
-                                    ],
-                                    step: (videoFilter["config"][configType] as FilterConfigNumber)[
-                                      "step"
-                                    ]
-                                  }
-                                }}
-                                type="number"
-                                size="small"
-                                sx={{ m: 1, width: "10vw", minWidth: 130 }}
-                                onChange={(e) => {
-                                  handleFilterChange(
-                                    videoFilterIndex,
-                                    configType,
-                                    parseInt(e.target.value),
-                                    "video_filters"
-                                  );
-                                }}
-                              />
-                            );
-                          }
-                        })}
+                                />
+                              );
+                            }
+                          })}
+                        </Box>
                       </Box>
-                    </Box>
-                  );
-                }
-              )}
-
+                    );
+                  }
+                )}
+              </Box>
               {/* Displays applied group filters */}
               <Typography variant="overline" display="block">
                 Group Filters
@@ -945,8 +1026,27 @@ function ParticipantDataModal({
                   );
                 }
               )}
+              <FormControlLabel
+                control={<Checkbox />}
+                label="Asymmetric View"
+                checked={asymmetricView.length > 0}
+                onChange={(event) => {
+                  const isChecked = (event.target as HTMLInputElement).checked;
+
+                  isChecked ? setAsymmetricView(originalDimensions) : setAsymmetricView([]);
+                }}
+              />
             </Box>
-          </Box>
+            {asymmetricView.length > 0 && (
+              <div className="pl-5">
+                <DragAndDrop
+                  participantDimensions={asymmetricView}
+                  setParticipantDimensions={setAsymmetricView}
+                  asymmetricView={true}
+                />
+              </div>
+            )}
+          </div>
         </DialogContent>
         <DialogActions sx={{ alignSelf: "center" }}>
           <ActionButton

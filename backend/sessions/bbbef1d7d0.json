@@ -29,7 +29,9 @@
             "audio_filters": [],
             "video_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "view": [],
+            "canvas_id": "12345"
         },
         {
             "id": "b",
@@ -50,7 +52,9 @@
             "audio_filters": [],
             "video_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "view": [],
+            "canvas_id": "67890"
         },
         {
             "id": "c",
@@ -71,7 +75,9 @@
             "audio_filters": [],
             "video_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "view": [],
+            "canvas_id": "23456"
         },
         {
             "id": "d",
@@ -92,7 +98,9 @@
             "audio_filters": [],
             "video_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "view": [],
+            "canvas_id": "34567"
         },
         {
             "id": "e",
@@ -113,7 +121,9 @@
             "audio_filters": [],
             "video_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "view": [],
+            "canvas_id": "45678"
         },
         {
             "id": "f",
@@ -134,7 +144,9 @@
             "audio_filters": [],
             "video_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "view": [],
+            "canvas_id": "56789"
         },
         {
             "id": "g",
@@ -155,7 +167,9 @@
             "audio_filters": [],
             "video_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "view": [],
+            "canvas_id": "78901"
         },
         {
             "id": "h",
@@ -176,7 +190,9 @@
             "audio_filters": [],
             "video_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "view": [],
+            "canvas_id": "89012"
         },
         {
             "id": "i",
@@ -197,7 +213,9 @@
             "audio_filters": [],
             "video_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "view": [],
+            "canvas_id": "90123"
         },
         {
             "id": "j",
@@ -218,7 +236,9 @@
             "audio_filters": [],
             "video_filters": [],
             "audio_group_filters": [],
-            "video_group_filters": []
+            "video_group_filters": [],
+            "view": [],
+            "canvas_id": "01234"
         }
     ],
     "log": []

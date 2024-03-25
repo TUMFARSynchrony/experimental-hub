@@ -5,6 +5,7 @@ Use for type hints and static type checking without any overhead during runtime.
 from typing import TypedDict
 
 from custom_types.chat_message import ChatMessageDict
+from custom_types.canvas_element import CanvasElementDict
 from filters import FilterDict
 from session.data.position import PositionDict
 from session.data.size import SizeDict
@@ -42,6 +43,10 @@ class ParticipantDict(TypedDict):
         Chat log between experimenter and participant.
     banned : bool
         Whether this participant is banned from the experiment.
+    view : list of custom_types.canvas_element.CanvasElementDict
+        Asymmetric view of the participant
+    canvas_id: str
+        Unique id for the placement of the participant stream
 
     See Also
     --------
@@ -64,3 +69,5 @@ class ParticipantDict(TypedDict):
     size: SizeDict
     chat: list[ChatMessageDict]
     banned: bool
+    view: list[CanvasElementDict]
+    canvas_id: str

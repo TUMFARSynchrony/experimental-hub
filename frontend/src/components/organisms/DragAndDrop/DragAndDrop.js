@@ -5,7 +5,7 @@ import { changeParticipantDimensions } from "../../../redux/slices/openSessionSl
 import Rectangle from "../../atoms/Rectangle/Rectangle";
 import { CANVAS_SIZE } from "../../../utils/constants";
 
-function DragAndDrop({ participantDimensions, setParticipantDimensions }) {
+function DragAndDrop({ participantDimensions, setParticipantDimensions, asymmetricView }) {
   const [selectedShape, setSelectShape] = useState(null);
 
   const dispatch = useAppDispatch();
@@ -17,7 +17,7 @@ function DragAndDrop({ participantDimensions, setParticipantDimensions }) {
     }
   };
   return (
-    <div className="w-full h-full pr-8">
+    <div className="w-full h-full">
       <Stage
         className="flex items-center justify-center bg-slate-200 rounded-md shadow-lg"
         width={CANVAS_SIZE.width}
@@ -41,20 +41,22 @@ function DragAndDrop({ participantDimensions, setParticipantDimensions }) {
                     dimensions[index].groups = newAttrs;
                     setParticipantDimensions(dimensions);
 
-                    dispatch(
-                      changeParticipantDimensions({
-                        index: index,
-                        position: {
-                          x: newAttrs.x,
-                          y: newAttrs.y,
-                          z: 0
-                        },
-                        size: {
-                          width: newAttrs.width,
-                          height: newAttrs.height
-                        }
-                      })
-                    );
+                    if (!asymmetricView) {
+                      dispatch(
+                        changeParticipantDimensions({
+                          index: index,
+                          position: {
+                            x: newAttrs.x,
+                            y: newAttrs.y,
+                            z: 0
+                          },
+                          size: {
+                            width: newAttrs.width,
+                            height: newAttrs.height
+                          }
+                        })
+                      );
+                    }
                   }}
                 />
               );

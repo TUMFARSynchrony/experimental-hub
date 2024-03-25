@@ -1,8 +1,11 @@
 import React, { useEffect, useRef } from "react";
 import { Image, Group, Text } from "react-konva";
 import { useUserStream } from "./Streams";
-import { Participant } from "../../../types";
+import { CanvasElement, Participant } from "../../../types";
 import Konva from "konva";
+import { useAppSelector } from "../../../redux/hooks";
+import { useSearchParams } from "react-router-dom";
+import { selectCurrentSession } from "../../../redux/slices/sessionsListSlice";
 
 type VideoProps = {
   src: MediaProvider;
@@ -12,6 +15,19 @@ type VideoProps = {
 };
 
 const Video = ({ src, participantData, title, shouldMute }: VideoProps) => {
+  const session = useAppSelector(selectCurrentSession);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeParticipantId = searchParams.get("participantId");
+  const activeParticipant = session.participants.find(
+    (participant) => participant.id === activeParticipantId
+  ) || { view: [] as CanvasElement[] };
+  const asymmetricViewCheck = activeParticipant.view.length > 0;
+  const videoData = asymmetricViewCheck
+    ? activeParticipant.view.find(
+        (participant) => participant.id === participantData.canvas_id
+      ) || { size: { width: 0, height: 0 }, position: { x: 0, y: 0, z: 0 } }
+    : participantData;
+
   const useVideo = (stream: MediaStream | null) => {
     const videoRef = useRef(document.createElement("video"));
 
@@ -53,10 +69,10 @@ const Video = ({ src, participantData, title, shouldMute }: VideoProps) => {
       <Image
         ref={shapeRef}
         image={video}
-        width={participantData.size.width}
-        height={participantData.size.height}
-        x={participantData.position.x}
-        y={participantData.position.y}
+        width={videoData.size.width}
+        height={videoData.size.height}
+        x={videoData.position.x}
+        y={videoData.position.y}
       />
       <Text
         text={title}
@@ -64,9 +80,9 @@ const Video = ({ src, participantData, title, shouldMute }: VideoProps) => {
         fontFamily="Arial"
         fill="black"
         align="center"
-        x={participantData.position.x} // Adjust X-coordinate to position the title
-        y={participantData.position.y + participantData.size.height} // Adjust Y-coordinate to position below the video
-        width={participantData.size.width}
+        x={videoData.position.x} // Adjust X-coordinate to position the title
+        y={videoData.position.y + videoData.size.height} // Adjust Y-coordinate to position below the video
+        width={videoData.size.width}
       />
     </Group>
   );
